@@ -26,7 +26,6 @@ const Announcements = () => {
     try {
       const res = await api.get('/announcements');
       const items = res.data?.items || (Array.isArray(res.data) ? res.data : []);
-      // Sort newest first
       const sorted = [...items].sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
       setAnnouncements(sorted);
     } catch (err) {
@@ -62,19 +61,27 @@ const Announcements = () => {
   };
 
   return (
-    <div style={{ maxWidth: '840px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#0f172a', margin: '0 0 0.25rem 0' }}>
-          Company Announcements
-        </h1>
-        <p style={{ margin: 0, color: '#64748b', fontSize: '0.875rem' }}>
-          Official updates, notices, holiday schedules, and workplace bulletins.
-        </p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '880px', margin: '0 auto', animation: 'fadeIn 0.25s ease' }}>
+      <div className="page-header" style={{ marginBottom: 0 }}>
+        <div className="page-header-info">
+          <h1>Company Announcements</h1>
+          <p>Official updates, notices, holiday schedules, and workplace bulletins.</p>
+        </div>
       </div>
 
       {success && (
-        <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', color: '#15803d', padding: '0.75rem', borderRadius: '6px', fontSize: '0.85rem', marginBottom: '1rem' }}>
-          {success}
+        <div
+          style={{
+            backgroundColor: 'var(--success-bg)',
+            border: '1px solid var(--success-border)',
+            color: 'var(--success)',
+            padding: '0.85rem 1.25rem',
+            borderRadius: 'var(--radius-md)',
+            fontSize: '0.875rem',
+            fontWeight: 500
+          }}
+        >
+          ✓ {success}
         </div>
       )}
 
@@ -82,20 +89,11 @@ const Announcements = () => {
 
       {/* Publisher Form for Admin and HR */}
       {canPost && (
-        <div style={{
-          backgroundColor: '#ffffff',
-          border: '1px solid #e2e8f0',
-          borderRadius: '8px',
-          padding: '1.25rem',
-          marginBottom: '2rem',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-        }}>
-          <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem', color: '#0f172a' }}>
-            Publish New Announcement
-          </h3>
-          <form onSubmit={handlePost} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+        <div className="card">
+          <h3 style={{ margin: '0 0 1rem 0' }}>Publish New Announcement</h3>
+          <form onSubmit={handlePost} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', color: '#334155', marginBottom: '0.25rem' }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.35rem' }}>
                 Title
               </label>
               <input
@@ -104,18 +102,12 @@ const Announcements = () => {
                 placeholder="e.g. Office Closure on Eid Holidays"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.6rem 0.75rem',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '6px',
-                  fontSize: '0.875rem'
-                }}
+                className="input"
               />
             </div>
 
             <div>
-              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', color: '#334155', marginBottom: '0.25rem' }}>
+              <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.35rem' }}>
                 Message Content
               </label>
               <textarea
@@ -124,29 +116,18 @@ const Announcements = () => {
                 placeholder="Write the announcement details here..."
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '0.6rem 0.75rem',
-                  border: '1px solid #cbd5e1',
-                  borderRadius: '6px',
-                  fontSize: '0.875rem',
-                  fontFamily: 'inherit'
-                }}
+                className="textarea"
               />
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <label style={{ fontSize: '0.8rem', fontWeight: '600', color: '#334155' }}>Priority:</label>
+                <label style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)' }}>Priority:</label>
                 <select
                   value={priority}
                   onChange={(e) => setPriority(e.target.value)}
-                  style={{
-                    padding: '0.4rem 0.65rem',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '6px',
-                    fontSize: '0.8rem'
-                  }}
+                  className="select"
+                  style={{ width: 'auto', padding: '0.4rem 0.75rem', fontSize: '0.8rem' }}
                 >
                   <option value="normal">Normal</option>
                   <option value="high">High Priority</option>
@@ -156,17 +137,7 @@ const Announcements = () => {
               <button
                 type="submit"
                 disabled={submitting}
-                style={{
-                  backgroundColor: '#2563eb',
-                  color: '#ffffff',
-                  border: 'none',
-                  borderRadius: '6px',
-                  padding: '0.55rem 1.25rem',
-                  fontSize: '0.875rem',
-                  fontWeight: '600',
-                  cursor: submitting ? 'not-allowed' : 'pointer',
-                  opacity: submitting ? 0.7 : 1
-                }}
+                className="btn btn-primary"
               >
                 {submitting ? 'Publishing...' : 'Publish Announcement'}
               </button>
@@ -176,8 +147,8 @@ const Announcements = () => {
       )}
 
       {/* Announcements Stream */}
-      <div style={{ marginBottom: '1rem' }}>
-        <h2 style={{ fontSize: '1.15rem', fontWeight: '600', color: '#0f172a', margin: '0 0 1rem 0' }}>
+      <div>
+        <h2 style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--text)', margin: '0 0 1rem 0' }}>
           Recent Broadcasts
         </h2>
 
@@ -196,39 +167,29 @@ const Announcements = () => {
                 return (
                   <div
                     key={item.id}
+                    className="card"
                     style={{
-                      backgroundColor: '#ffffff',
-                      border: isHigh ? '1px solid #fed7aa' : '1px solid #e2e8f0',
-                      borderLeft: isHigh ? '4px solid #f97316' : '4px solid #2563eb',
-                      borderRadius: '8px',
-                      padding: '1.25rem',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+                      borderLeft: isHigh ? '4px solid var(--warning)' : '4px solid var(--primary)',
+                      padding: '1.25rem 1.5rem',
+                      transition: 'all var(--transition-fast)'
                     }}
                   >
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem', gap: '0.5rem' }}>
-                      <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#0f172a', fontWeight: '600' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.65rem', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <h3 style={{ margin: 0, fontSize: '1.05rem', color: 'var(--text)' }}>
                         {item.title}
                       </h3>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         {isHigh && (
-                          <span style={{
-                            backgroundColor: '#ffedd5',
-                            color: '#c2410c',
-                            fontSize: '0.7rem',
-                            fontWeight: '700',
-                            padding: '0.15rem 0.45rem',
-                            borderRadius: '4px',
-                            textTransform: 'uppercase'
-                          }}>
+                          <span className="badge badge-late" style={{ fontSize: '0.675rem' }}>
                             High Priority
                           </span>
                         )}
-                        <span style={{ fontSize: '0.75rem', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                           {item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'Recent'}
                         </span>
                       </div>
                     </div>
-                    <p style={{ margin: 0, color: '#334155', fontSize: '0.875rem', lineHeight: '1.5', whiteSpace: 'pre-line' }}>
+                    <p style={{ margin: 0, color: 'var(--text)', fontSize: '0.875rem', lineHeight: '1.6', whiteSpace: 'pre-line' }}>
                       {item.content || item.message}
                     </p>
                   </div>
