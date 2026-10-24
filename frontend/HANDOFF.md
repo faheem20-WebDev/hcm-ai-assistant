@@ -1,42 +1,53 @@
-# FRONTEND HANDOFF LOG
+# FRONTEND HANDOFF & DESIGN SYSTEM STATUS
 
-## Status Overview
+## Executive Summary
+Audited on: 2026-10-25 (Saylani Hackathon HCM Lite)
+Scope: Visual redesign ONLY. Logic, state, API endpoints, mockApi, permissions, and routes remain unchanged.
 
-### DONE
-- **Scaffold, Auth & Routing**: Vite + React 18, React Router v6, Axios interceptors, responsive Layout with mobile drawer navigation, ProtectedRoute with role enforcement (`admin`, `hr`, `employee`).
-- **Setup Page (`/setup`)**: Initial company settings and first Admin registration (`GET /setup/status`, `POST /setup`).
-- **Change Password (`/change-password`)**: Mandatory forced change for first-time login (`mustChangePassword: true`) and self-service password update.
-- **Organization Settings (`/organization`)**: Company office geofence & working hours, Departments, Designations, Leave Types, and Holidays management (Admin write / HR read).
-- **HR Users Administration (`/hr-users`)**: HR user creation with auto-generated temporary password copy banner, Admin Deactivate and Reset Password actions (`POST /users/hr`, `PATCH /users/:id/deactivate`, `POST /users/:id/reset-password`).
-- **Audit Logs (`/audit`)**: Immutable administrative audit trail with pagination and expandable event metadata.
-- **Attendance (`/attendance`)**: Employee geolocated check-in/out, monthly attendance history, attendance correction request modal; HR/Admin attendance board and correction approvals queue.
-- **Leaves & Smart Leave (`/leave`)**: Employee leave balances cards, natural language AI Smart Leave parser (`POST /ai/smart-leave`), leave application modal, cancellation; HR/Admin approval queue with decision modal.
-- **Payroll & Payslips (`/payroll`, `/payslips`)**: HR monthly payroll draft calculation, run breakdown, Admin finalization lock; Employee payslip statement history and PDF download.
-- **Announcements (`/announcements`)**: Company-wide announcement bulletin board, HR/Admin announcement composer with priority tagging.
-- **Employee Profile (`/profile`)**: Employee profile overview and self-service contact update (`PATCH /me/profile`).
-- **Dashboards (`/dashboard`)**: Role-scoped dashboards for Admin, HR, and Employee. Recharts visualizations (attendance trends, department headcounts), date/department filtering, and AI Summarize button (`POST /ai/summary`) with visible `AI-generated` badge.
-- **AI Chat Assistant (`/ai`)**: Role-aware conversational interface (`POST /ai/chat`), suggested prompts, employee colleague salary refusal guardrail, and `AI-generated` response badges.
+---
 
-- **Employees Directory (`/frontend/src/pages/Employees.jsx`)**: Full directory table with search, department & status filters, responsive layout, register modal with copyable temp password, edit employee details modal, and admin reset password & reset PIN actions.
-- **PIN Setup & Verification (`/login`)**: Mandatory 5-digit PIN step on login for HR and Employee accounts (`POST /auth/pin/verify`, `POST /auth/pin/setup`). Admin accounts bypass PIN directly.
-- **Forgot Password & Admin Reset Requests Queue (`/login`, `/hr-users`)**: User self-service reset request modal, and Admin review/approval queue in HR Users to approve and generate temporary credentials or reject.
-- **Admin Reset PIN**: Admin action to clear forgotten or locked 5-digit PINs for HR users and Employees (`POST /users/:id/reset-pin`).
-- **Clean Empty In-Memory Mock (`mockApi.js`)**: All user and workforce state initialized 100% empty (zero seed employees or users). Flows cleanly from initial setup -> Admin -> HR -> Employee.
+## Redesign Progress by Category
 
-- **API Endpoints Contract (`/API_ENDPOINTS.md`)**: Full backend API specification document covering setup, authentication, PIN verification, forgot password, employees, attendance geofence, leaves, payroll, announcements, dashboards, and AI endpoints.
+### 1. Design System & Theme Tokens: [DONE]
+- File: `src/styles/theme.css` (imported in `main.jsx`).
+- Indigo-violet primary `#5B5BD6`, teal accent `#14B8A6`, light bg `#F4F5FF`, dark bg `#0F1224`, surface `#1B1F3B`.
+- Complete utility classes: `.card`, `.btn`, `.btn-primary`, `.btn-secondary`, `.btn-danger`, `.btn-ghost`, `.input`, `.select`, `.textarea`, `.badge`, `.badge-*`, `.ai-badge`, `.kpi-card`, `.table-container`, `.table`, `.tabs-nav`, `.tab-btn`, `.skeleton`, `.avatar`, `.modal-backdrop`, `.modal-card`.
 
-- **Responsive Polish (375px)**: Navigation drawer, table horizontal scroll wrappers, adaptive headers, and card layouts tested down to 375px mobile viewports.
+### 2. Layout Shell & Auth: [DONE]
+- `AuthLayout.jsx` & `AuthLayout.css`: Compact centered card (max-width 900px, 24px radius, soft shadow), 3D SVG robot with interactive visor and pupil tracking.
+- Auth Pages (`Login.jsx`, `Setup.jsx`, `ChangePassword.jsx`): Converted to compact card format with 5-digit PIN and forgot password flows.
+- `Layout.jsx` & `Layout.css`: Indigo-violet gradient sidebar, inline SVG icons, robot brand wordmark, glowing pill active items, desktop collapse mode, mobile drawer, sticky blur header with breadcrumbs, animated sun/moon dark mode toggle, and notification bell.
 
-### IN PROGRESS
-- None.
+### 3. Shared Components: [DONE]
+- `src/components/Loading.jsx`: Modern skeleton shimmer cards, table skeletons, and pulse loaders using `.skeleton` & design tokens.
+- `src/components/Empty.jsx`: Modern inline SVG empty state illustration, theme-aware colors, action buttons.
+- `src/components/ErrorBox.jsx`: Modern alert badge/card with SVG icon, retry action, and theme error tokens.
 
-### PENDING
-- None. All planned modules, flows, and specifications are implemented.
+### 4. Pages Redesign: [IN PROGRESS]
+In order of execution:
+1. `Dashboard.jsx`: [DONE] KPI cards, custom theme tooltips for Recharts, AI summary card, status badges, employee check-in hero.
+2. `Employees.jsx`: [DONE] Filter bar, table container, badges, action buttons, modals (register, edit, reset).
+3. `HrUsers.jsx`: [DONE] HR directory table, add HR modal, password copy alert banner, reset queue.
+4. `Attendance.jsx`: [DONE] Check-in/out hero card with geofence indicator, calendar/history table, correction modal.
+5. `Leave.jsx`: [DONE] Balance cards, Smart Leave AI prompt box, application modal, approval queue.
+6. `Payroll.jsx` & `Payslips.jsx`: [DONE] Payroll run overview, calculation table, finalization lock, employee payslip list.
+7. `Announcements.jsx`: [DONE] Priority tag cards, composer modal/card, pinned bulletin styling.
+8. `Audit.jsx`: [DONE] Filterable log table, expandable JSON metadata drawer/card.
+9. `Organization.jsx`: [DONE] Tabbed settings (geofence, departments, designations, leaves, holidays).
+10. `Profile.jsx`: [DONE] Profile card, editable contact form, avatar banner.
+11. `AIAssistant.jsx`: [DONE] Chat bubbles, suggested prompts chips, streaming indicator, AI badges.
 
-## Known Issues
-- None. All items from the planned specification and audit are implemented and operational.
+### 6. Floating AI Robot Redesign: [DONE]
+- Item 1 [DONE]: Removed AI menu item from sidebar and mobile drawer navigation for admin, hr, and employee roles. Old /ai page remains accessible.
+- Item 2 [DONE]: Mounted animated compact robot across all logged-in views with responsive clamp() size, idle floating, eye-tracking, and speech bubble.
+- Item 3 [DONE]: Floating popup chat panel with role suggestion chips, conversation persistence, open full page link, and dark mode support.
 
-## Ready-to-Paste Next Prompt
-```text
-All core and extended frontend capabilities (Empty bootstrap setup, Admin/HR/Employee workflows, 5-digit PIN security, password reset requests queue, Employees directory, Recharts dashboards, AI Assistant and /API_ENDPOINTS.md) are complete. Run `npm run build` in /frontend to verify full production build integrity.
-```
+### 7. Branding & Robot Name (Nova): [DONE]
+- Browser Favicon [DONE]: Created modern SVG robot favicon (`frontend/public/favicon.svg`) and linked it in `index.html` with title `HCM Lite — AI Workforce`.
+- Robot Naming [DONE]: Named the AI robot assistant **Nova** ("Nova • HCM Assistant") across speech bubbles, floating chat headers, greetings, status indicators, and the full `/ai` page.
+- Verification [DONE]: Production build passes cleanly with zero errors (`npm run build`).
+
+---
+
+## Status
+All redesign milestones, component updates, floating AI assistant (Nova), and browser favicon are 100% complete and production-built.

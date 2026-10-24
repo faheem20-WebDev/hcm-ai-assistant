@@ -45,14 +45,12 @@ const Audit = () => {
   const totalPages = Math.max(1, Math.ceil(total / limit));
 
   return (
-    <div>
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#0f172a', margin: '0 0 0.25rem 0' }}>
-          System Audit Trail
-        </h1>
-        <p style={{ margin: 0, color: '#64748b', fontSize: '0.875rem' }}>
-          Immutable administrative record of modifications, security events, policy updates, and state transitions.
-        </p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'fadeIn 0.25s ease' }}>
+      <div className="page-header" style={{ marginBottom: 0 }}>
+        <div className="page-header-info">
+          <h1>System Audit Trail</h1>
+          <p>Immutable administrative record of modifications, security events, policy updates, and state transitions.</p>
+        </div>
       </div>
 
       <ErrorBox error={error} onRetry={() => fetchAuditLogs(page)} />
@@ -66,111 +64,127 @@ const Audit = () => {
             description="System activity and audit trails will be recorded and displayed here."
           />
         ) : (
-          <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
-              <thead style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+          <div className="table-container">
+            <table className="table">
+              <thead>
                 <tr>
-                  <th style={{ width: '40px', padding: '0.85rem 0.5rem 0.85rem 1rem' }}></th>
-                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Timestamp</th>
-                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Actor</th>
-                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Action</th>
-                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Entity</th>
-                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Details</th>
+                  <th style={{ width: '36px', padding: '0.85rem 0.5rem 0.85rem 1rem' }}></th>
+                  <th>Timestamp</th>
+                  <th>Actor</th>
+                  <th>Action</th>
+                  <th>Entity</th>
+                  <th>Details</th>
                 </tr>
               </thead>
               <tbody>
                 {logs.map((log) => {
                   const isExpanded = Boolean(expandedRows[log.id]);
-                  const hasState = log.before !== undefined || log.after !== undefined;
 
                   return (
                     <React.Fragment key={log.id}>
                       <tr
                         onClick={() => toggleRow(log.id)}
                         style={{
-                          borderBottom: isExpanded ? 'none' : '1px solid #f1f5f9',
                           cursor: 'pointer',
-                          backgroundColor: isExpanded ? '#f8fafc' : '#ffffff',
-                          transition: 'background 0.15s ease'
+                          backgroundColor: isExpanded ? 'var(--surface-2)' : 'transparent',
+                          transition: 'background var(--transition-fast)'
                         }}
                       >
-                        <td style={{ padding: '0.85rem 0.5rem 0.85rem 1rem', color: '#64748b' }}>
-                          {isExpanded ? '▼' : '▶'}
+                        <td style={{ padding: '0.85rem 0.5rem 0.85rem 1rem', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+                          <span
+                            style={{
+                              display: 'inline-block',
+                              transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)',
+                              transition: 'transform var(--transition-fast)'
+                            }}
+                          >
+                            ▶
+                          </span>
                         </td>
-                        <td style={{ padding: '0.85rem 1rem', color: '#64748b', whiteSpace: 'nowrap' }}>
+                        <td style={{ color: 'var(--text-muted)', whiteSpace: 'nowrap', fontSize: '0.825rem' }}>
                           {log.timestamp ? new Date(log.timestamp).toLocaleString() : '-'}
                         </td>
-                        <td style={{ padding: '0.85rem 1rem', fontWeight: '600', color: '#1e293b' }}>
+                        <td style={{ fontWeight: 600, color: 'var(--text)' }}>
                           {log.actor || 'system'}
                         </td>
-                        <td style={{ padding: '0.85rem 1rem' }}>
-                          <span style={{
-                            padding: '0.2rem 0.5rem',
-                            borderRadius: '4px',
-                            fontSize: '0.75rem',
-                            fontWeight: '600',
-                            backgroundColor: '#e0e7ff',
-                            color: '#3730a3'
-                          }}>
+                        <td>
+                          <span
+                            className="badge"
+                            style={{
+                              backgroundColor: 'rgba(91, 91, 214, 0.12)',
+                              color: 'var(--primary)',
+                              border: '1px solid rgba(91, 91, 214, 0.25)'
+                            }}
+                          >
                             {log.action}
                           </span>
                         </td>
-                        <td style={{ padding: '0.85rem 1rem', color: '#334155', fontWeight: '500' }}>
+                        <td style={{ color: 'var(--text)', fontWeight: 500 }}>
                           {log.entity || 'General'}
                         </td>
-                        <td style={{ padding: '0.85rem 1rem', color: '#64748b' }}>
+                        <td style={{ color: 'var(--text-muted)' }}>
                           {log.details || '-'}
                         </td>
                       </tr>
 
                       {isExpanded && (
-                        <tr style={{ borderBottom: '1px solid #e2e8f0', backgroundColor: '#f8fafc' }}>
+                        <tr style={{ backgroundColor: 'var(--surface-2)' }}>
                           <td colSpan={6} style={{ padding: '1rem 1.5rem' }}>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-                              <div style={{
-                                backgroundColor: '#ffffff',
-                                border: '1px solid #e2e8f0',
-                                borderRadius: '6px',
-                                padding: '0.85rem'
-                              }}>
-                                <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#dc2626', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                              <div
+                                style={{
+                                  backgroundColor: 'var(--surface)',
+                                  border: '1px solid var(--border)',
+                                  borderRadius: 'var(--radius-md)',
+                                  padding: '1rem'
+                                }}
+                              >
+                                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--danger)', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '0.04em' }}>
                                   Before State
                                 </div>
-                                <pre style={{
-                                  margin: 0,
-                                  fontSize: '0.8rem',
-                                  backgroundColor: '#fafafa',
-                                  padding: '0.75rem',
-                                  borderRadius: '4px',
-                                  border: '1px solid #f1f5f9',
-                                  overflowX: 'auto',
-                                  color: '#334155'
-                                }}>
+                                <pre
+                                  style={{
+                                    margin: 0,
+                                    fontSize: '0.8rem',
+                                    backgroundColor: 'var(--surface-2)',
+                                    padding: '0.75rem',
+                                    borderRadius: 'var(--radius-sm)',
+                                    border: '1px solid var(--border)',
+                                    overflowX: 'auto',
+                                    color: 'var(--text)',
+                                    fontFamily: 'var(--font-mono)'
+                                  }}
+                                >
                                   {log.before !== null && log.before !== undefined
                                     ? JSON.stringify(log.before, null, 2)
                                     : 'null (None / Created)'}
                                 </pre>
                               </div>
 
-                              <div style={{
-                                backgroundColor: '#ffffff',
-                                border: '1px solid #e2e8f0',
-                                borderRadius: '6px',
-                                padding: '0.85rem'
-                              }}>
-                                <div style={{ fontSize: '0.75rem', fontWeight: '700', color: '#16a34a', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+                              <div
+                                style={{
+                                  backgroundColor: 'var(--surface)',
+                                  border: '1px solid var(--border)',
+                                  borderRadius: 'var(--radius-md)',
+                                  padding: '1rem'
+                                }}
+                              >
+                                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--success)', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '0.04em' }}>
                                   After State
                                 </div>
-                                <pre style={{
-                                  margin: 0,
-                                  fontSize: '0.8rem',
-                                  backgroundColor: '#fafafa',
-                                  padding: '0.75rem',
-                                  borderRadius: '4px',
-                                  border: '1px solid #f1f5f9',
-                                  overflowX: 'auto',
-                                  color: '#334155'
-                                }}>
+                                <pre
+                                  style={{
+                                    margin: 0,
+                                    fontSize: '0.8rem',
+                                    backgroundColor: 'var(--surface-2)',
+                                    padding: '0.75rem',
+                                    borderRadius: 'var(--radius-sm)',
+                                    border: '1px solid var(--border)',
+                                    overflowX: 'auto',
+                                    color: 'var(--text)',
+                                    fontFamily: 'var(--font-mono)'
+                                  }}
+                                >
                                   {log.after !== null && log.after !== undefined
                                     ? JSON.stringify(log.after, null, 2)
                                     : 'null (Deleted)'}
@@ -187,45 +201,37 @@ const Audit = () => {
             </table>
 
             {/* Pagination Controls */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '0.75rem 1rem',
-              backgroundColor: '#f8fafc',
-              borderTop: '1px solid #e2e8f0',
-              fontSize: '0.85rem',
-              color: '#64748b'
-            }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '0.85rem 1.25rem',
+                backgroundColor: 'var(--surface-2)',
+                borderTop: '1px solid var(--border)',
+                fontSize: '0.85rem',
+                color: 'var(--text-muted)',
+                flexWrap: 'wrap',
+                gap: '0.75rem'
+              }}
+            >
               <div>
-                Showing page {page} of {totalPages} ({total} total entries)
+                Showing page <strong style={{ color: 'var(--text)' }}>{page}</strong> of <strong style={{ color: 'var(--text)' }}>{totalPages}</strong> ({total} total entries)
               </div>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <button
+                  type="button"
                   disabled={page <= 1}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  style={{
-                    padding: '0.35rem 0.75rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    background: '#ffffff',
-                    cursor: page <= 1 ? 'not-allowed' : 'pointer',
-                    opacity: page <= 1 ? 0.5 : 1
-                  }}
+                  className="btn btn-secondary btn-sm"
                 >
                   Previous
                 </button>
                 <button
+                  type="button"
                   disabled={page >= totalPages}
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  style={{
-                    padding: '0.35rem 0.75rem',
-                    borderRadius: '4px',
-                    border: '1px solid #cbd5e1',
-                    background: '#ffffff',
-                    cursor: page >= totalPages ? 'not-allowed' : 'pointer',
-                    opacity: page >= totalPages ? 0.5 : 1
-                  }}
+                  className="btn btn-secondary btn-sm"
                 >
                   Next
                 </button>

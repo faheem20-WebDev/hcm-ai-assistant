@@ -19,7 +19,7 @@ const HrUsers = () => {
   const [actionLoading, setActionLoading] = useState(false);
 
   // Generated Temp Password Notification Box
-  const [tempPassInfo, setTempPassInfo] = useState(null); // { userEmail, tempPassword, actionType }
+  const [tempPassInfo, setTempPassInfo] = useState(null);
   const [copied, setCopied] = useState(false);
 
   const fetchHrUsers = async () => {
@@ -166,80 +166,57 @@ const HrUsers = () => {
   const pendingRequestsCount = resetRequests.filter((r) => r.status === 'pending').length;
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#0f172a', margin: '0 0 0.25rem 0' }}>
-            HR Users & Access Administration
-          </h1>
-          <p style={{ margin: 0, color: '#64748b', fontSize: '0.875rem' }}>
-            Provision and manage Human Resource officer credentials, password resets, PIN resets, and incoming reset requests.
-          </p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'fadeIn 0.25s ease' }}>
+      <div className="page-header" style={{ marginBottom: 0 }}>
+        <div className="page-header-info">
+          <h1>HR Users & Access Administration</h1>
+          <p>Provision and manage Human Resource officer credentials, password resets, PIN resets, and incoming reset requests.</p>
         </div>
 
         {activeTab === 'officers' && (
           <button
+            type="button"
             onClick={() => setShowCreateModal(true)}
-            style={{
-              backgroundColor: '#2563eb',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '6px',
-              padding: '0.6rem 1.1rem',
-              fontSize: '0.875rem',
-              fontWeight: '600',
-              cursor: 'pointer'
-            }}
+            className="btn btn-primary"
           >
-            + Create HR Login
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Create HR Login
           </button>
         )}
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid #e2e8f0', marginBottom: '1.5rem' }}>
+      <div className="tabs-nav" style={{ marginBottom: 0 }}>
         <button
+          type="button"
           onClick={() => setActiveTab('officers')}
-          style={{
-            background: 'none',
-            border: 'none',
-            borderBottom: activeTab === 'officers' ? '2px solid #2563eb' : '2px solid transparent',
-            color: activeTab === 'officers' ? '#2563eb' : '#64748b',
-            fontWeight: activeTab === 'officers' ? '600' : '500',
-            padding: '0.6rem 0.5rem',
-            fontSize: '0.9rem',
-            cursor: 'pointer'
-          }}
+          className={`tab-btn ${activeTab === 'officers' ? 'active' : ''}`}
         >
           HR Officers ({hrUsers.length})
         </button>
 
         <button
+          type="button"
           onClick={() => setActiveTab('requests')}
-          style={{
-            background: 'none',
-            border: 'none',
-            borderBottom: activeTab === 'requests' ? '2px solid #2563eb' : '2px solid transparent',
-            color: activeTab === 'requests' ? '#2563eb' : '#64748b',
-            fontWeight: activeTab === 'requests' ? '600' : '500',
-            padding: '0.6rem 0.5rem',
-            fontSize: '0.9rem',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem'
-          }}
+          className={`tab-btn ${activeTab === 'requests' ? 'active' : ''}`}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
         >
           Password Reset Requests
           {pendingRequestsCount > 0 && (
-            <span style={{
-              backgroundColor: '#ef4444',
-              color: '#ffffff',
-              borderRadius: '9999px',
-              fontSize: '0.75rem',
-              fontWeight: '700',
-              padding: '0.1rem 0.45rem'
-            }}>
+            <span
+              style={{
+                backgroundColor: 'var(--danger)',
+                color: '#ffffff',
+                borderRadius: 'var(--radius-full)',
+                fontSize: '0.725rem',
+                fontWeight: 700,
+                padding: '0.1rem 0.45rem',
+                lineHeight: 1.2
+              }}
+            >
               {pendingRequestsCount}
             </span>
           )}
@@ -248,57 +225,51 @@ const HrUsers = () => {
 
       {/* Copyable Temporary Password Box */}
       {tempPassInfo && (
-        <div style={{
-          backgroundColor: '#eff6ff',
-          border: '1px solid #bfdbfe',
-          borderRadius: '8px',
-          padding: '1.25rem',
-          marginBottom: '1.5rem',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '0.5rem'
-        }}>
+        <div
+          className="card"
+          style={{
+            background: 'linear-gradient(135deg, rgba(91, 91, 214, 0.08) 0%, rgba(20, 184, 166, 0.08) 100%)',
+            borderColor: 'var(--primary)',
+            padding: '1.25rem 1.5rem',
+            animation: 'scaleIn 0.2s ease'
+          }}
+        >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontWeight: '600', color: '#1e40af', fontSize: '0.9rem' }}>
+            <span style={{ fontWeight: 700, color: 'var(--primary)', fontSize: '0.925rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
               🔑 Temporary Credentials Issued ({tempPassInfo.actionType})
             </span>
             <button
+              type="button"
               onClick={() => setTempPassInfo(null)}
-              style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: '1rem' }}
+              className="btn btn-ghost btn-sm"
+              style={{ padding: '0.2rem 0.5rem', color: 'var(--text-muted)' }}
             >
               ✕
             </button>
           </div>
-          <p style={{ margin: 0, fontSize: '0.85rem', color: '#334155' }}>
+          <p style={{ margin: '0.5rem 0 0.75rem 0', fontSize: '0.875rem', color: 'var(--text)' }}>
             Provide these temporary credentials to <strong>{tempPassInfo.userEmail}</strong>. They will be forced to change this password and setup their 5-digit PIN upon sign in.
           </p>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            marginTop: '0.25rem',
-            backgroundColor: '#ffffff',
-            border: '1px solid #cbd5e1',
-            borderRadius: '6px',
-            padding: '0.5rem 0.75rem',
-            maxWidth: '380px'
-          }}>
-            <code style={{ fontSize: '0.95rem', fontWeight: '700', color: '#0f172a', flex: 1, letterSpacing: '0.05em' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              backgroundColor: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
+              padding: '0.5rem 0.75rem',
+              maxWidth: '380px'
+            }}
+          >
+            <code style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--primary)', flex: 1, letterSpacing: '0.05em' }}>
               {tempPassInfo.tempPassword}
             </code>
             <button
+              type="button"
               onClick={handleCopyPassword}
-              style={{
-                backgroundColor: copied ? '#16a34a' : '#2563eb',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '4px',
-                padding: '0.35rem 0.75rem',
-                fontSize: '0.75rem',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'background 0.15s ease'
-              }}
+              className={`btn btn-sm ${copied ? 'btn-secondary' : 'btn-primary'}`}
+              style={{ padding: '0.3rem 0.75rem' }}
             >
               {copied ? '✓ Copied' : 'Copy'}
             </button>
@@ -307,8 +278,18 @@ const HrUsers = () => {
       )}
 
       {success && (
-        <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', color: '#15803d', padding: '0.75rem', borderRadius: '6px', fontSize: '0.85rem', marginBottom: '1rem' }}>
-          {success}
+        <div
+          style={{
+            backgroundColor: 'var(--success-bg)',
+            border: '1px solid var(--success-border)',
+            color: 'var(--success)',
+            padding: '0.85rem 1.25rem',
+            borderRadius: 'var(--radius-md)',
+            fontSize: '0.875rem',
+            fontWeight: 500
+          }}
+        >
+          ✓ {success}
         </div>
       )}
 
@@ -322,93 +303,77 @@ const HrUsers = () => {
           <Empty
             title="No HR Officers Found"
             description="No HR user accounts have been provisioned yet. Click '+ Create HR Login' to provision access."
+            action={
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(true)}
+                className="btn btn-primary"
+                style={{ marginTop: '0.5rem' }}
+              >
+                + Create HR Login
+              </button>
+            }
           />
         ) : (
-          <div style={{
-            backgroundColor: '#ffffff',
-            border: '1px solid #e2e8f0',
-            borderRadius: '8px',
-            overflowX: 'auto',
-            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)'
-          }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem', minWidth: '650px' }}>
+          <div className="table-container">
+            <table className="table">
               <thead>
-                <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Officer Name</th>
-                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Email Address</th>
-                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Account Status</th>
-                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Password Status</th>
-                  <th style={{ padding: '0.85rem 1rem', textAlign: 'right', color: '#475569', fontWeight: '600' }}>Actions</th>
+                <tr>
+                  <th>Officer Name</th>
+                  <th>Email Address</th>
+                  <th>Account Status</th>
+                  <th>Password Status</th>
+                  <th style={{ textAlign: 'right' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {hrUsers.map((hr) => (
-                  <tr key={hr.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '0.85rem 1rem', fontWeight: '600', color: '#1e293b' }}>{hr.name}</td>
-                    <td style={{ padding: '0.85rem 1rem', color: '#64748b' }}>{hr.email}</td>
-                    <td style={{ padding: '0.85rem 1rem' }}>
-                      <span style={{
-                        padding: '0.2rem 0.5rem',
-                        borderRadius: '4px',
-                        fontSize: '0.75rem',
-                        fontWeight: '600',
-                        backgroundColor: hr.isActive ? '#dcfce7' : '#fee2e2',
-                        color: hr.isActive ? '#15803d' : '#b91c1c'
-                      }}>
+                  <tr key={hr.id}>
+                    <td style={{ fontWeight: 600, color: 'var(--text)' }}>{hr.name}</td>
+                    <td style={{ color: 'var(--text-muted)' }}>{hr.email}</td>
+                    <td>
+                      <span className={`badge ${hr.isActive ? 'badge-active' : 'badge-inactive'}`}>
                         {hr.isActive ? 'Active' : 'Deactivated'}
                       </span>
                     </td>
-                    <td style={{ padding: '0.85rem 1rem', color: hr.mustChangePassword ? '#d97706' : '#64748b', fontSize: '0.8rem' }}>
-                      {hr.mustChangePassword ? 'Pending Change' : 'Active'}
+                    <td>
+                      <span
+                        className="badge"
+                        style={{
+                          backgroundColor: hr.mustChangePassword ? 'var(--warning-bg)' : 'var(--success-bg)',
+                          color: hr.mustChangePassword ? 'var(--warning)' : 'var(--success)',
+                          border: `1px solid ${hr.mustChangePassword ? 'var(--warning-border)' : 'var(--success-border)'}`
+                        }}
+                      >
+                        {hr.mustChangePassword ? 'Pending Change' : 'Active'}
+                      </span>
                     </td>
-                    <td style={{ padding: '0.85rem 1rem', textAlign: 'right' }}>
+                    <td style={{ textAlign: 'right' }}>
                       <div style={{ display: 'inline-flex', gap: '0.4rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                         <button
+                          type="button"
                           onClick={() => handleResetPassword(hr.id, hr.email)}
                           disabled={actionLoading}
-                          style={{
-                            backgroundColor: '#fef3c7',
-                            border: '1px solid #fde68a',
-                            color: '#92400e',
-                            borderRadius: '4px',
-                            padding: '0.3rem 0.6rem',
-                            cursor: 'pointer',
-                            fontSize: '0.75rem',
-                            fontWeight: '600'
-                          }}
+                          className="btn btn-secondary btn-sm"
+                          style={{ color: 'var(--warning)', borderColor: 'var(--warning-border)' }}
                         >
                           Reset Pwd
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleResetPin(hr.id, hr.email)}
                           disabled={actionLoading}
-                          style={{
-                            backgroundColor: '#e0e7ff',
-                            border: '1px solid #c7d2fe',
-                            color: '#3730a3',
-                            borderRadius: '4px',
-                            padding: '0.3rem 0.6rem',
-                            cursor: 'pointer',
-                            fontSize: '0.75rem',
-                            fontWeight: '600'
-                          }}
+                          className="btn btn-secondary btn-sm"
+                          style={{ color: 'var(--primary)', borderColor: 'rgba(91, 91, 214, 0.3)' }}
                         >
                           Reset PIN
                         </button>
                         {hr.isActive && (
                           <button
+                            type="button"
                             onClick={() => handleDeactivate(hr.id, hr.email)}
                             disabled={actionLoading}
-                            style={{
-                              backgroundColor: '#fee2e2',
-                              border: '1px solid #fecaca',
-                              color: '#dc2626',
-                              borderRadius: '4px',
-                              padding: '0.3rem 0.6rem',
-                              cursor: 'pointer',
-                              fontSize: '0.75rem',
-                              fontWeight: '600'
-                            }}
+                            className="btn btn-danger btn-sm"
                           >
                             Deactivate
                           </button>
@@ -431,83 +396,52 @@ const HrUsers = () => {
             description="Zero password reset requests pending. Requests submitted by users on the login page will appear here."
           />
         ) : (
-          <div style={{
-            backgroundColor: '#ffffff',
-            border: '1px solid #e2e8f0',
-            borderRadius: '8px',
-            overflowX: 'auto',
-            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)'
-          }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem', minWidth: '650px' }}>
+          <div className="table-container">
+            <table className="table">
               <thead>
-                <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>User Email</th>
-                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Reason / Note</th>
-                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Requested At</th>
-                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Status</th>
-                  <th style={{ padding: '0.85rem 1rem', textAlign: 'right', color: '#475569', fontWeight: '600' }}>Actions</th>
+                <tr>
+                  <th>User Email</th>
+                  <th>Reason / Note</th>
+                  <th>Requested At</th>
+                  <th>Status</th>
+                  <th style={{ textAlign: 'right' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {resetRequests.map((req) => (
-                  <tr key={req.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '0.85rem 1rem', fontWeight: '600', color: '#0f172a' }}>{req.email}</td>
-                    <td style={{ padding: '0.85rem 1rem', color: '#64748b' }}>{req.reason || '—'}</td>
-                    <td style={{ padding: '0.85rem 1rem', color: '#64748b', fontSize: '0.8rem' }}>
+                  <tr key={req.id}>
+                    <td style={{ fontWeight: 600, color: 'var(--text)' }}>{req.email}</td>
+                    <td style={{ color: 'var(--text-muted)' }}>{req.reason || '—'}</td>
+                    <td style={{ color: 'var(--text-muted)', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
                       {new Date(req.createdAt).toLocaleString()}
                     </td>
-                    <td style={{ padding: '0.85rem 1rem' }}>
-                      <span style={{
-                        padding: '0.2rem 0.5rem',
-                        borderRadius: '4px',
-                        fontSize: '0.75rem',
-                        fontWeight: '600',
-                        backgroundColor:
-                          req.status === 'approved' ? '#dcfce7' : req.status === 'rejected' ? '#fee2e2' : '#fef3c7',
-                        color:
-                          req.status === 'approved' ? '#15803d' : req.status === 'rejected' ? '#b91c1c' : '#b45309'
-                      }}>
+                    <td>
+                      <span className={`badge badge-${req.status || 'pending'}`}>
                         {req.status ? req.status.toUpperCase() : 'PENDING'}
                       </span>
                     </td>
-                    <td style={{ padding: '0.85rem 1rem', textAlign: 'right' }}>
+                    <td style={{ textAlign: 'right' }}>
                       {req.status === 'pending' ? (
                         <div style={{ display: 'inline-flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
                           <button
+                            type="button"
                             onClick={() => handleApproveResetRequest(req)}
                             disabled={actionLoading}
-                            style={{
-                              backgroundColor: '#2563eb',
-                              color: '#ffffff',
-                              border: 'none',
-                              borderRadius: '4px',
-                              padding: '0.35rem 0.65rem',
-                              fontSize: '0.75rem',
-                              fontWeight: '600',
-                              cursor: 'pointer'
-                            }}
+                            className="btn btn-primary btn-sm"
                           >
                             Approve & Reset
                           </button>
                           <button
+                            type="button"
                             onClick={() => handleRejectResetRequest(req)}
                             disabled={actionLoading}
-                            style={{
-                              backgroundColor: '#fee2e2',
-                              border: '1px solid #fecaca',
-                              color: '#b91c1c',
-                              borderRadius: '4px',
-                              padding: '0.35rem 0.65rem',
-                              fontSize: '0.75rem',
-                              fontWeight: '600',
-                              cursor: 'pointer'
-                            }}
+                            className="btn btn-danger btn-sm"
                           >
                             Reject
                           </button>
                         </div>
                       ) : (
-                        <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Completed</span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.775rem' }}>Completed</span>
                       )}
                     </td>
                   </tr>
@@ -520,65 +454,61 @@ const HrUsers = () => {
 
       {/* Create HR Login Modal */}
       {showCreateModal && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 100,
-          padding: '1rem'
-        }}>
-          <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '8px',
-            padding: '1.75rem',
-            width: '100%',
-            maxWidth: '420px',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)'
-          }}>
-            <h3 style={{ margin: '0 0 1.25rem 0', fontSize: '1.15rem', color: '#0f172a' }}>
-              Create HR Officer Login
-            </h3>
+        <div className="modal-backdrop">
+          <div className="modal-card" style={{ maxWidth: '440px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <h2 style={{ margin: 0 }}>Create HR Officer Login</h2>
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(false)}
+                className="btn btn-ghost btn-sm"
+                style={{ padding: '0.2rem 0.5rem' }}
+              >
+                ✕
+              </button>
+            </div>
 
             <form onSubmit={handleCreateHr} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.25rem' }}>Full Name</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.35rem' }}>
+                  Full Name
+                </label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Sarah Jenkins"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.875rem', boxSizing: 'border-box' }}
+                  className="input"
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.25rem' }}>Work Email</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.35rem' }}>
+                  Work Email
+                </label>
                 <input
                   type="email"
                   required
                   placeholder="sarah.hr@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.875rem', boxSizing: 'border-box' }}
+                  className="input"
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.75rem' }}>
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  style={{ padding: '0.5rem 1rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}
+                  className="btn btn-secondary"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  style={{ padding: '0.5rem 1rem', background: '#2563eb', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                  className="btn btn-primary"
                 >
                   {actionLoading ? 'Creating...' : 'Create Account'}
                 </button>

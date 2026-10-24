@@ -5,13 +5,13 @@ import Loading from '../components/Loading';
 import Empty from '../components/Empty';
 import ErrorBox from '../components/ErrorBox';
 
-const statusColors = {
-  present: { bg: '#dcfce7', text: '#15803d', label: 'Present' },
-  late: { bg: '#fef3c7', text: '#b45309', label: 'Late' },
-  half_day: { bg: '#ffedd5', text: '#c2410c', label: 'Half Day' },
-  absent: { bg: '#fee2e2', text: '#b91c1c', label: 'Absent' },
-  on_leave: { bg: '#e0e7ff', text: '#3730a3', label: 'On Leave' },
-  missing_checkout: { bg: '#f1f5f9', text: '#475569', label: 'Missing Checkout' }
+const statusMap = {
+  present: { badgeClass: 'badge-present', label: 'Present' },
+  late: { badgeClass: 'badge-late', label: 'Late' },
+  half_day: { badgeClass: 'badge-half_day', label: 'Half Day' },
+  absent: { badgeClass: 'badge-absent', label: 'Absent' },
+  on_leave: { badgeClass: 'badge-on_leave', label: 'On Leave' },
+  missing_checkout: { badgeClass: 'badge-missing_checkout', label: 'Missing Checkout' }
 };
 
 const Attendance = () => {
@@ -104,7 +104,7 @@ const Attendance = () => {
     const firstDay = new Date(year, month - 1, 1);
     const lastDay = new Date(year, month, 0);
     const totalDays = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay(); // 0 is Sun
+    const startingDayOfWeek = firstDay.getDay();
 
     const days = [];
     for (let i = 0; i < startingDayOfWeek; i++) {
@@ -129,39 +129,44 @@ const Attendance = () => {
   const calendarDays = buildCalendarDays();
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#0f172a', margin: '0 0 0.25rem 0' }}>
-            Attendance & Time Tracking
-          </h1>
-          <p style={{ margin: 0, color: '#64748b', fontSize: '0.875rem' }}>
-            {isEmployee ? 'Review your monthly attendance history and request attendance corrections.' : 'Real-time company attendance monitor.'}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'fadeIn 0.25s ease' }}>
+      <div className="page-header" style={{ marginBottom: 0 }}>
+        <div className="page-header-info">
+          <h1>Attendance & Time Tracking</h1>
+          <p>
+            {isEmployee
+              ? 'Review your monthly attendance history and request attendance corrections.'
+              : 'Real-time company attendance monitor and employee daily logs.'}
           </p>
         </div>
 
         {isEmployee && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#334155' }}>Month:</label>
+            <label style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)' }}>Month:</label>
             <input
               type="month"
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(e.target.value)}
-              style={{
-                padding: '0.45rem 0.75rem',
-                border: '1px solid #cbd5e1',
-                borderRadius: '6px',
-                fontSize: '0.875rem',
-                backgroundColor: '#ffffff'
-              }}
+              className="input"
+              style={{ width: 'auto', padding: '0.45rem 0.85rem' }}
             />
           </div>
         )}
       </div>
 
       {success && (
-        <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', color: '#15803d', padding: '0.75rem', borderRadius: '6px', fontSize: '0.85rem', marginBottom: '1rem' }}>
-          {success}
+        <div
+          style={{
+            backgroundColor: 'var(--success-bg)',
+            border: '1px solid var(--success-border)',
+            color: 'var(--success)',
+            padding: '0.85rem 1.25rem',
+            borderRadius: 'var(--radius-md)',
+            fontSize: '0.875rem',
+            fontWeight: 500
+          }}
+        >
+          ✓ {success}
         </div>
       )}
 
@@ -172,36 +177,60 @@ const Attendance = () => {
       {!loading && isEmployee && (
         <>
           {/* Status Legend */}
-          <div style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '1rem',
-            alignItems: 'center',
-            backgroundColor: '#ffffff',
-            border: '1px solid #e2e8f0',
-            borderRadius: '8px',
-            padding: '0.85rem 1.25rem',
-            marginBottom: '1.25rem',
-            fontSize: '0.8rem'
-          }}>
-            <span style={{ fontWeight: '600', color: '#334155' }}>Status Legend:</span>
-            {Object.entries(statusColors).map(([k, v]) => (
-              <div key={k} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                <span style={{ width: '12px', height: '12px', borderRadius: '3px', backgroundColor: v.bg, border: `1px solid ${v.text}` }} />
-                <span style={{ color: '#475569' }}>{v.label}</span>
-              </div>
+          <div
+            className="card"
+            style={{
+              padding: '0.85rem 1.25rem',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '1rem',
+              alignItems: 'center',
+              fontSize: '0.8rem'
+            }}
+          >
+            <span style={{ fontWeight: 600, color: 'var(--text)' }}>Status Legend:</span>
+            {Object.entries(statusMap).map(([k, v]) => (
+              <span key={k} className={`badge ${v.badgeClass}`}>
+                {v.label}
+              </span>
             ))}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-              <span style={{ width: '12px', height: '12px', borderRadius: '3px', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1' }} />
-              <span style={{ color: '#64748b' }}>Weekend / Off</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--text-muted)' }}>
+              <span
+                style={{
+                  width: '10px',
+                  height: '10px',
+                  borderRadius: '2px',
+                  backgroundColor: 'var(--surface-3)',
+                  border: '1px solid var(--border)'
+                }}
+              />
+              <span>Weekend / Off</span>
             </div>
           </div>
 
           {/* Monthly Attendance Calendar */}
-          <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden', padding: '1rem' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.5rem', textAlign: 'center', marginBottom: '0.5rem' }}>
+          <div className="card" style={{ padding: '1.25rem' }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(7, 1fr)',
+                gap: '0.5rem',
+                textAlign: 'center',
+                marginBottom: '0.75rem'
+              }}
+            >
               {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
-                <div key={d} style={{ fontSize: '0.75rem', fontWeight: '700', color: '#64748b', padding: '0.25rem 0' }}>
+                <div
+                  key={d}
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    color: 'var(--text-muted)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.04em',
+                    padding: '0.25rem 0'
+                  }}
+                >
                   {d}
                 </div>
               ))}
@@ -210,19 +239,22 @@ const Attendance = () => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.5rem' }}>
               {calendarDays.map((cell, idx) => {
                 if (!cell) {
-                  return <div key={`empty-${idx}`} style={{ minHeight: '80px', backgroundColor: '#fafafa', borderRadius: '6px' }} />;
+                  return (
+                    <div
+                      key={`empty-${idx}`}
+                      style={{
+                        minHeight: '88px',
+                        backgroundColor: 'var(--surface-2)',
+                        borderRadius: 'var(--radius-sm)',
+                        opacity: 0.4
+                      }}
+                    />
+                  );
                 }
 
                 const { dayNum, dateStr, record, isWeekend } = cell;
                 const status = record?.status;
-                const colorInfo = statusColors[status];
-
-                let bg = isWeekend ? '#f8fafc' : '#ffffff';
-                let borderColor = '#e2e8f0';
-                if (colorInfo) {
-                  bg = colorInfo.bg;
-                  borderColor = colorInfo.text;
-                }
+                const statusInfo = statusMap[status];
 
                 return (
                   <div
@@ -230,38 +262,53 @@ const Attendance = () => {
                     onClick={() => handleDayClick(dateStr, record)}
                     title="Click to request attendance correction"
                     style={{
-                      minHeight: '80px',
-                      backgroundColor: bg,
-                      border: `1px solid ${borderColor}`,
-                      borderRadius: '6px',
-                      padding: '0.5rem',
+                      minHeight: '88px',
+                      backgroundColor: isWeekend ? 'var(--surface-2)' : 'var(--surface)',
+                      border: status ? '1.5px solid var(--border)' : '1px solid var(--border)',
+                      borderRadius: 'var(--radius-md)',
+                      padding: '0.6rem',
                       display: 'flex',
                       flexDirection: 'column',
                       justifyContent: 'space-between',
                       cursor: 'pointer',
-                      transition: 'transform 0.1s ease, box-shadow 0.1s ease'
+                      transition: 'all var(--transition-fast)',
+                      boxShadow: 'var(--shadow-xs)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--primary)';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.borderColor = 'var(--border)';
+                      e.currentTarget.style.transform = 'none';
                     }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.8rem', fontWeight: '700', color: isWeekend ? '#94a3b8' : '#1e293b' }}>
+                      <span
+                        style={{
+                          fontSize: '0.825rem',
+                          fontWeight: 700,
+                          color: isWeekend ? 'var(--text-muted)' : 'var(--text)'
+                        }}
+                      >
                         {dayNum}
                       </span>
                       {status && (
-                        <span style={{ fontSize: '0.65rem', fontWeight: '700', textTransform: 'uppercase', color: colorInfo?.text }}>
-                          {colorInfo?.label || status}
+                        <span className={`badge ${statusInfo?.badgeClass || ''}`} style={{ fontSize: '0.65rem', padding: '0.1rem 0.4rem' }}>
+                          {statusInfo?.label || status}
                         </span>
                       )}
                     </div>
 
                     {record && (
-                      <div style={{ fontSize: '0.7rem', color: '#334155', marginTop: '0.25rem' }}>
-                        <div>In: {record.checkIn || '-'}</div>
-                        <div>Out: {record.checkOut || '-'}</div>
+                      <div style={{ fontSize: '0.725rem', color: 'var(--text)', marginTop: '0.35rem', lineHeight: 1.3 }}>
+                        <div>In: <strong style={{ color: 'var(--text)' }}>{record.checkIn || '-'}</strong></div>
+                        <div>Out: <strong style={{ color: 'var(--text)' }}>{record.checkOut || '-'}</strong></div>
                       </div>
                     )}
 
                     {!record && !isWeekend && (
-                      <div style={{ fontSize: '0.65rem', color: '#94a3b8', fontStyle: 'italic' }}>
+                      <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontStyle: 'italic', marginTop: '0.35rem' }}>
                         No punch
                       </div>
                     )}
@@ -273,38 +320,28 @@ const Attendance = () => {
 
           {/* Pending Corrections List */}
           {corrections.length > 0 && (
-            <div style={{ marginTop: '2rem' }}>
-              <h3 style={{ fontSize: '1.05rem', fontWeight: '600', color: '#0f172a', marginBottom: '0.75rem' }}>
-                Your Correction Requests
-              </h3>
-              <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
-                  <thead style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+            <div className="card">
+              <h3 style={{ margin: '0 0 1rem 0' }}>Your Correction Requests</h3>
+              <div className="table-container" style={{ border: 'none', boxShadow: 'none' }}>
+                <table className="table">
+                  <thead>
                     <tr>
-                      <th style={{ padding: '0.75rem 1rem', color: '#475569' }}>Date</th>
-                      <th style={{ padding: '0.75rem 1rem', color: '#475569' }}>Requested In</th>
-                      <th style={{ padding: '0.75rem 1rem', color: '#475569' }}>Requested Out</th>
-                      <th style={{ padding: '0.75rem 1rem', color: '#475569' }}>Reason</th>
-                      <th style={{ padding: '0.75rem 1rem', color: '#475569' }}>Status</th>
+                      <th>Date</th>
+                      <th>Requested In</th>
+                      <th>Requested Out</th>
+                      <th>Reason</th>
+                      <th>Status</th>
                     </tr>
                   </thead>
                   <tbody>
                     {corrections.map((c) => (
-                      <tr key={c.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '0.75rem 1rem', fontWeight: '600' }}>{c.date}</td>
-                        <td style={{ padding: '0.75rem 1rem' }}>{c.requestedCheckIn}</td>
-                        <td style={{ padding: '0.75rem 1rem' }}>{c.requestedCheckOut}</td>
-                        <td style={{ padding: '0.75rem 1rem', color: '#64748b' }}>{c.reason}</td>
-                        <td style={{ padding: '0.75rem 1rem' }}>
-                          <span style={{
-                            padding: '0.2rem 0.5rem',
-                            borderRadius: '4px',
-                            fontSize: '0.75rem',
-                            fontWeight: '600',
-                            backgroundColor: c.status === 'approved' ? '#dcfce7' : c.status === 'rejected' ? '#fee2e2' : '#fef3c7',
-                            color: c.status === 'approved' ? '#15803d' : c.status === 'rejected' ? '#b91c1c' : '#b45309',
-                            textTransform: 'capitalize'
-                          }}>
+                      <tr key={c.id}>
+                        <td style={{ fontWeight: 600, color: 'var(--text)' }}>{c.date}</td>
+                        <td style={{ color: 'var(--text)' }}>{c.requestedCheckIn}</td>
+                        <td style={{ color: 'var(--text)' }}>{c.requestedCheckOut}</td>
+                        <td style={{ color: 'var(--text-muted)' }}>{c.reason}</td>
+                        <td>
+                          <span className={`badge badge-${c.status || 'pending'}`}>
                             {c.status}
                           </span>
                         </td>
@@ -320,37 +357,37 @@ const Attendance = () => {
 
       {/* HR / Admin View fallback */}
       {!loading && !isEmployee && (
-        <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
-            <thead style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+        <div className="table-container">
+          <table className="table">
+            <thead>
               <tr>
-                <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Employee</th>
-                <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Check-In</th>
-                <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Check-Out</th>
-                <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Status</th>
+                <th>Employee</th>
+                <th>Check-In</th>
+                <th>Check-Out</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              {records.map((r, idx) => (
-                <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                  <td style={{ padding: '0.85rem 1rem', fontWeight: '600' }}>{r.name}</td>
-                  <td style={{ padding: '0.85rem 1rem' }}>{r.checkIn || '-'}</td>
-                  <td style={{ padding: '0.85rem 1rem' }}>{r.checkOut || '-'}</td>
-                  <td style={{ padding: '0.85rem 1rem' }}>
-                    <span style={{
-                      padding: '0.2rem 0.5rem',
-                      borderRadius: '4px',
-                      fontSize: '0.75rem',
-                      fontWeight: '600',
-                      backgroundColor: r.status === 'present' ? '#dcfce7' : '#fee2e2',
-                      color: r.status === 'present' ? '#15803d' : '#b91c1c',
-                      textTransform: 'capitalize'
-                    }}>
-                      {r.status}
-                    </span>
+              {records.length === 0 ? (
+                <tr>
+                  <td colSpan={4} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>
+                    No check-in records recorded for today.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                records.map((r, idx) => (
+                  <tr key={idx}>
+                    <td style={{ fontWeight: 600, color: 'var(--text)' }}>{r.name}</td>
+                    <td style={{ color: 'var(--text)' }}>{r.checkIn || '-'}</td>
+                    <td style={{ color: 'var(--text)' }}>{r.checkOut || '-'}</td>
+                    <td>
+                      <span className={`badge badge-${r.status || 'present'}`}>
+                        {r.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -358,61 +395,53 @@ const Attendance = () => {
 
       {/* Correction Request Modal */}
       {correctionModalOpen && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 100,
-          padding: '1rem'
-        }}>
-          <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '8px',
-            padding: '1.75rem',
-            width: '100%',
-            maxWidth: '440px',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)'
-          }}>
-            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.15rem', color: '#0f172a' }}>
-              Request Attendance Correction
-            </h3>
-            <p style={{ margin: '0 0 1.25rem 0', fontSize: '0.85rem', color: '#64748b' }}>
-              Target Date: <strong>{selectedDate}</strong>
+        <div className="modal-backdrop">
+          <div className="modal-card" style={{ maxWidth: '440px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <h2 style={{ margin: 0 }}>Request Correction</h2>
+              <button
+                type="button"
+                onClick={() => setCorrectionModalOpen(false)}
+                className="btn btn-ghost btn-sm"
+                style={{ padding: '0.2rem 0.5rem' }}
+              >
+                ✕
+              </button>
+            </div>
+            <p style={{ margin: '0 0 1.25rem 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              Target Date: <strong style={{ color: 'var(--text)' }}>{selectedDate}</strong>
             </p>
 
             <form onSubmit={handleCorrectionSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.25rem' }}>
-                    Requested Check-In
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.35rem' }}>
+                    Requested In
                   </label>
                   <input
                     type="time"
                     required
                     value={reqCheckIn}
                     onChange={(e) => setReqCheckIn(e.target.value)}
-                    style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.875rem' }}
+                    className="input"
                   />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.25rem' }}>
-                    Requested Check-Out
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.35rem' }}>
+                    Requested Out
                   </label>
                   <input
                     type="time"
                     required
                     value={reqCheckOut}
                     onChange={(e) => setReqCheckOut(e.target.value)}
-                    style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.875rem' }}
+                    className="input"
                   />
                 </div>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.25rem' }}>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.35rem' }}>
                   Reason (Required)
                 </label>
                 <textarea
@@ -421,22 +450,22 @@ const Attendance = () => {
                   placeholder="Explain why a correction is needed (e.g. system glitch, offsite client meeting)..."
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.875rem', fontFamily: 'inherit' }}
+                  className="textarea"
                 />
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
                 <button
                   type="button"
                   onClick={() => setCorrectionModalOpen(false)}
-                  style={{ padding: '0.5rem 1rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}
+                  className="btn btn-secondary"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  style={{ padding: '0.5rem 1.25rem', background: '#2563eb', color: '#fff', border: 'none', borderRadius: '4px', fontWeight: '600', cursor: 'pointer' }}
+                  className="btn btn-primary"
                 >
                   {submitting ? 'Submitting...' : 'Submit Request'}
                 </button>
