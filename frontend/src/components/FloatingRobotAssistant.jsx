@@ -21,7 +21,7 @@ const FloatingRobotAssistant = ({ user }) => {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: `Hello ${user?.name || ''}! How can I assist you with leaves, policies, or attendance today?`,
+      content: `Hello ${user?.name || ''}! I'm Nova, your AI workforce assistant. How can I assist you with leaves, policies, or attendance today?`,
       label: 'AI-generated',
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
@@ -185,7 +185,7 @@ const FloatingRobotAssistant = ({ user }) => {
                 </svg>
               </div>
               <div>
-                <h3 className="floating-chat-title">HCM Assistant</h3>
+                <h3 className="floating-chat-title">Nova • HCM Assistant</h3>
                 <span className="ai-badge" style={{ fontSize: '0.625rem', padding: '0.05rem 0.35rem' }}>
                   AI-generated
                 </span>
@@ -233,7 +233,7 @@ const FloatingRobotAssistant = ({ user }) => {
               <div key={idx} className={`floating-msg-bubble ${m.role}`}>
                 <div>{m.content}</div>
                 <div className="floating-msg-meta">
-                  {m.role === 'assistant' && <span>✦ AI</span>}
+                  {m.role === 'assistant' && <span>✦ Nova</span>}
                   <span>{m.time}</span>
                 </div>
               </div>
@@ -241,7 +241,7 @@ const FloatingRobotAssistant = ({ user }) => {
 
             {loading && (
               <div className="floating-typing">
-                <span>Assistant is typing</span>
+                <span>Nova is typing</span>
                 <span className="floating-dot" />
                 <span className="floating-dot" />
                 <span className="floating-dot" />
@@ -263,7 +263,7 @@ const FloatingRobotAssistant = ({ user }) => {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask me anything..."
+              placeholder="Ask Nova anything..."
               className="floating-chat-input"
               disabled={loading}
             />
@@ -285,7 +285,7 @@ const FloatingRobotAssistant = ({ user }) => {
       {/* 2. SPEECH BUBBLE */}
       {(showBubble || isHovered) && !isOpen && (
         <div className="floating-speech-bubble" onClick={handleToggleChat}>
-          <span>✨</span> Ask me anything
+          <span>✨</span> Hi, I'm Nova! Ask me anything
         </div>
       )}
 
@@ -297,8 +297,8 @@ const FloatingRobotAssistant = ({ user }) => {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         className={`floating-robot-trigger ${isOpen ? 'chat-open' : ''}`}
-        aria-label="Open HCM AI Assistant"
-        title="Open HCM AI Assistant"
+        aria-label="Chat with Nova, HCM AI Assistant"
+        title="Chat with Nova, HCM AI Assistant"
       >
         {/* Unread indicator */}
         {hasUnread && !isOpen && <span className="floating-unread-dot" />}

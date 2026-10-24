@@ -41,9 +41,13 @@ In order of execution:
 - Item 1 [DONE]: Removed AI menu item from sidebar and mobile drawer navigation for admin, hr, and employee roles. Old /ai page remains accessible.
 - Item 2 [DONE]: Mounted animated compact robot across all logged-in views with responsive clamp() size, idle floating, eye-tracking, and speech bubble.
 - Item 3 [DONE]: Floating popup chat panel with role suggestion chips, conversation persistence, open full page link, and dark mode support.
+
+### 7. Branding & Robot Name (Nova): [DONE]
+- Browser Favicon [DONE]: Created modern SVG robot favicon (`frontend/public/favicon.svg`) and linked it in `index.html` with title `HCM Lite — AI Workforce`.
+- Robot Naming [DONE]: Named the AI robot assistant **Nova** ("Nova • HCM Assistant") across speech bubbles, floating chat headers, greetings, status indicators, and the full `/ai` page.
 - Verification [DONE]: Production build passes cleanly with zero errors (`npm run build`).
 
 ---
 
 ## Status
-All redesign milestones, component updates, and floating AI assistant integrations are 100% complete and production-built.
+All redesign milestones, component updates, floating AI assistant (Nova), and browser favicon are 100% complete and production-built.

@@ -10,7 +10,7 @@ const AIAssistant = () => {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: `Hello ${user?.name || ''}! I am your HCM Lite AI Assistant. How can I assist you with company policies, leave entitlements, or workforce data today?`,
+      content: `Hello ${user?.name || ''}! I am Nova, your HCM Lite AI Assistant. How can I assist you with company policies, leave entitlements, or workforce data today?`,
       label: 'AI-generated',
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
@@ -97,7 +97,7 @@ const AIAssistant = () => {
       {/* Header */}
       <div className="page-header" style={{ marginBottom: 0 }}>
         <div className="page-header-info">
-          <h1>HCM AI Assistant</h1>
+          <h1>Nova AI Assistant</h1>
           <p>Powered by Google Gemini with role-scoped data security.</p>
         </div>
         <span className="ai-badge">✦ AI-generated Engine</span>
@@ -195,7 +195,7 @@ const AIAssistant = () => {
         {loading && (
           <div style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 0' }}>
             <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 500 }}>
-              AI Assistant is thinking
+              Nova is thinking
             </span>
             <span style={{ display: 'inline-flex', gap: '4px' }}>
               <span
@@ -238,7 +238,7 @@ const AIAssistant = () => {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask a policy query, leave calculation, or test security boundary..."
+          placeholder="Ask Nova a policy query, leave calculation, or test security boundary..."
           disabled={loading}
           className="input"
           style={{ flex: 1, padding: '0.75rem 1rem' }}
