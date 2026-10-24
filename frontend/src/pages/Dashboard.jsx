@@ -1,17 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Legend,
+  PieChart,
+  Pie,
+  Cell
+} from 'recharts';
 import { useAuth } from '../context/AuthContext';
 import api from '../api';
 import Loading from '../components/Loading';
 import ErrorBox from '../components/ErrorBox';
 
+const PIE_COLORS = ['#2563eb', '#16a34a', '#f59e0b', '#8b5cf6', '#dc2626'];
+
 const Dashboard = () => {
   const { user } = useAuth();
-  const isEmployee = user?.role === 'employee';
+  const role = user?.role;
+  const isEmployee = role === 'employee';
+  const isHr = role === 'hr';
+  const isAdmin = role === 'admin';
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Filters for Admin / HR
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
+  const [departmentId, setDepartmentId] = useState('');
+
+  // AI Summary State
+  const [summaryBullets, setSummaryBullets] = useState(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [summaryError, setSummaryError] = useState(null);
+
+  // Employee Check-In/Out states
   const [checkActionLoading, setCheckActionLoading] = useState(false);
   const [checkSuccess, setCheckSuccess] = useState(null);
   const [checkError, setCheckError] = useState(null);
@@ -20,11 +52,18 @@ const Dashboard = () => {
     setLoading(true);
     setError(null);
     try {
-      const endpoint = user?.role === 'admin'
-        ? '/dashboard/admin'
-        : user?.role === 'hr'
-        ? '/dashboard/hr'
-        : '/dashboard/me';
+      let endpoint = '/dashboard/me';
+      const params = new URLSearchParams();
+      if (fromDate) params.append('from', fromDate);
+      if (toDate) params.append('to', toDate);
+      if (departmentId) params.append('departmentId', departmentId);
+
+      const qs = params.toString() ? `?${params.toString()}` : '';
+
+      if (isAdmin) endpoint = `/dashboard/admin${qs}`;
+      else if (isHr) endpoint = `/dashboard/hr${qs}`;
+      else endpoint = `/dashboard/me`;
+
       const res = await api.get(endpoint);
       setData(res.data);
     } catch (err) {
@@ -36,9 +75,23 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchDashboard();
-  }, [user?.role]);
+  }, [role, fromDate, toDate, departmentId]);
 
-  // Check In Handler
+  // AI Summary Trigger
+  const handleGenerateSummary = async () => {
+    setSummaryLoading(true);
+    setSummaryError(null);
+    try {
+      const res = await api.post('/ai/summary', { dashboard: data });
+      setSummaryBullets(res.data?.bullets || []);
+    } catch (err) {
+      setSummaryError(err?.response?.data?.error || 'Failed to generate AI executive summary.');
+    } finally {
+      setSummaryLoading(false);
+    }
+  };
+
+  // Employee Check In
   const handleCheckIn = async () => {
     setCheckActionLoading(true);
     setCheckSuccess(null);
@@ -70,7 +123,7 @@ const Dashboard = () => {
     }
   };
 
-  // Check Out Handler
+  // Employee Check Out
   const handleCheckOut = async () => {
     setCheckActionLoading(true);
     setCheckSuccess(null);
@@ -100,7 +153,9 @@ const Dashboard = () => {
 
   if (loading) return <Loading message="Loading dashboard overview..." />;
 
-  // Employee specific view
+  // =========================================================================
+  // EMPLOYEE VIEW
+  // =========================================================================
   if (isEmployee) {
     const todayAtt = data?.todayAttendance;
     const hours = data?.hoursThisWeek || 0;
@@ -112,7 +167,6 @@ const Dashboard = () => {
 
     return (
       <div style={{ maxWidth: '1000px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        {/* Top Header & Assistant Prompt */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
             <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#0f172a', margin: '0 0 0.25rem 0' }}>
@@ -142,7 +196,6 @@ const Dashboard = () => {
           </Link>
         </div>
 
-        {/* Check-In / Check-Out Widget */}
         <div style={{
           backgroundColor: '#ffffff',
           border: '1px solid #e2e8f0',
@@ -234,9 +287,7 @@ const Dashboard = () => {
           </div>
         )}
 
-        {/* Stats Grid: Hours this week, Late count, Last Payslip */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-          {/* Hours this week vs 40 */}
           <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem' }}>
             <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>
               Hours This Week
@@ -249,7 +300,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Late Count */}
           <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem' }}>
             <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>
               Late Arrivals (This Month)
@@ -257,10 +307,9 @@ const Dashboard = () => {
             <div style={{ fontSize: '1.5rem', fontWeight: '700', color: data?.lateCountMonth > 0 ? '#d97706' : '#16a34a', margin: '0.25rem 0' }}>
               {data?.lateCountMonth || 0}
             </div>
-            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Grace period: 15 mins (09:15)</div>
+            <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Grace threshold: 09:15</div>
           </div>
 
-          {/* Last Payslip */}
           <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
               <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>
@@ -279,7 +328,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Leave Balance Cards */}
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
             <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#0f172a', fontWeight: '600' }}>Leave Balances</h3>
@@ -305,7 +353,6 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Announcements Widget */}
         {announcements.length > 0 && (
           <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
@@ -328,59 +375,345 @@ const Dashboard = () => {
     );
   }
 
-  // Admin / HR Dashboard view
+  // =========================================================================
+  // HR & ADMIN VIEWS (Items 1 & 2)
+  // =========================================================================
+  const deptList = data?.departments || [];
+
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* Top Header & Filters */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#0f172a', margin: '0 0 0.25rem 0' }}>
-            Overview ({user?.role?.toUpperCase()})
+            {isAdmin ? 'Executive Administration Dashboard' : 'Human Resources Analytics Dashboard'}
           </h1>
           <p style={{ margin: 0, color: '#64748b', fontSize: '0.875rem' }}>
-            Workforce summary and today's operational indicators.
+            Live workforce metrics, departmental statistics, and AI executive summaries.
           </p>
         </div>
+
+        {/* AI Summarize Action */}
+        <button
+          onClick={handleGenerateSummary}
+          disabled={summaryLoading}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            backgroundColor: '#7c3aed',
+            color: '#ffffff',
+            border: 'none',
+            padding: '0.6rem 1.1rem',
+            borderRadius: '6px',
+            fontSize: '0.85rem',
+            fontWeight: '600',
+            cursor: summaryLoading ? 'not-allowed' : 'pointer',
+            opacity: summaryLoading ? 0.7 : 1
+          }}
+        >
+          {summaryLoading ? 'Generating...' : '✨ Summarize with AI'}
+        </button>
       </div>
 
       <ErrorBox error={error} onRetry={fetchDashboard} />
+      <ErrorBox error={summaryError} />
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-        <div style={{ background: '#fff', padding: '1.25rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>
-            Total Employees
+      {/* AI Summary Card */}
+      {summaryBullets && (
+        <div style={{
+          backgroundColor: '#faf5ff',
+          border: '1px solid #d8b4fe',
+          borderRadius: '8px',
+          padding: '1.25rem',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+            <span style={{ fontSize: '1.1rem' }}>💡</span>
+            <h3 style={{ margin: 0, fontSize: '0.95rem', fontWeight: '700', color: '#581c87' }}>
+              Executive Dashboard Summary
+            </h3>
+            <span className="ai-badge">AI-generated</span>
           </div>
-          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#0f172a', marginTop: '0.25rem' }}>
-            {data?.totalEmployees || 0}
-          </div>
+          <ul style={{ margin: 0, paddingLeft: '1.25rem', color: '#3b0764', fontSize: '0.85rem', lineHeight: '1.6' }}>
+            {summaryBullets.map((bullet, idx) => (
+              <li key={idx}>{bullet}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Global Filter Bar (From Date, To Date, Department) */}
+      <div style={{
+        backgroundColor: '#ffffff',
+        border: '1px solid #e2e8f0',
+        borderRadius: '8px',
+        padding: '0.85rem 1.25rem',
+        display: 'flex',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '1rem',
+        fontSize: '0.85rem'
+      }}>
+        <span style={{ fontWeight: '600', color: '#334155' }}>Filters:</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <label style={{ color: '#64748b' }}>From:</label>
+          <input
+            type="date"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+            style={{ padding: '0.35rem 0.5rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.8rem' }}
+          />
         </div>
 
-        <div style={{ background: '#fff', padding: '1.25rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>
-            Present Today
-          </div>
-          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#16a34a', marginTop: '0.25rem' }}>
-            {data?.presentToday || 0}
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <label style={{ color: '#64748b' }}>To:</label>
+          <input
+            type="date"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+            style={{ padding: '0.35rem 0.5rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.8rem' }}
+          />
         </div>
 
-        <div style={{ background: '#fff', padding: '1.25rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>
-            On Leave Today
-          </div>
-          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#f59e0b', marginTop: '0.25rem' }}>
-            {data?.onLeaveToday || 0}
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <label style={{ color: '#64748b' }}>Department:</label>
+          <select
+            value={departmentId}
+            onChange={(e) => setDepartmentId(e.target.value)}
+            style={{ padding: '0.35rem 0.5rem', border: '1px solid #cbd5e1', borderRadius: '4px', fontSize: '0.8rem' }}
+          >
+            <option value="">All Departments</option>
+            {deptList.map((d) => (
+              <option key={d.id} value={d.id}>{d.name}</option>
+            ))}
+          </select>
         </div>
 
-        <div style={{ background: '#fff', padding: '1.25rem', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-          <div style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>
-            Pending Corrections
-          </div>
-          <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#dc2626', marginTop: '0.25rem' }}>
-            {data?.pendingCorrections || 0}
-          </div>
-        </div>
+        {(fromDate || toDate || departmentId) && (
+          <button
+            onClick={() => { setFromDate(''); setToDate(''); setDepartmentId(''); }}
+            style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '500' }}
+          >
+            Reset Filters
+          </button>
+        )}
       </div>
+
+      {/* ------------------------------------------------------------- */}
+      {/* 1. HR DASHBOARD CONTENT */}
+      {/* ------------------------------------------------------------- */}
+      {isHr && (
+        <>
+          {/* HR KPI Cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Total Headcount</div>
+              <div style={{ fontSize: '1.6rem', fontWeight: '700', color: '#0f172a', marginTop: '0.25rem' }}>{data?.headcount || 0}</div>
+            </div>
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Present Today</div>
+              <div style={{ fontSize: '1.6rem', fontWeight: '700', color: '#16a34a', marginTop: '0.25rem' }}>{data?.presentToday || 0}</div>
+            </div>
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>On Leave Today</div>
+              <div style={{ fontSize: '1.6rem', fontWeight: '700', color: '#2563eb', marginTop: '0.25rem' }}>{data?.onLeaveToday || 0}</div>
+            </div>
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Late Today</div>
+              <div style={{ fontSize: '1.6rem', fontWeight: '700', color: '#f59e0b', marginTop: '0.25rem' }}>{data?.lateToday || 0}</div>
+            </div>
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Pending Approvals</div>
+              <div style={{ fontSize: '1.6rem', fontWeight: '700', color: '#dc2626', marginTop: '0.25rem' }}>{data?.pendingApprovals || 0}</div>
+            </div>
+          </div>
+
+          {/* Recharts: Attendance Trend Line & Absenteeism By Dept Bar */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.25rem' }}>
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem' }}>
+              <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', color: '#0f172a' }}>Weekly Attendance Trend</h3>
+              <div style={{ height: '240px', width: '100%' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={data?.attendanceTrend || []}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="day" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="present" stroke="#16a34a" strokeWidth={2} name="Present" />
+                    <Line type="monotone" dataKey="late" stroke="#f59e0b" strokeWidth={2} name="Late" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem' }}>
+              <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', color: '#0f172a' }}>Absenteeism Rate by Department (%)</h3>
+              <div style={{ height: '240px', width: '100%' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={data?.absenteeismByDept || []}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="dept" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="rate" fill="#ef4444" radius={[4, 4, 0, 0]} name="Absenteeism %" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          {/* Recharts: Leave by Type & Top 5 Late-Comers */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.25rem' }}>
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem' }}>
+              <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', color: '#0f172a' }}>Leave Distribution by Type</h3>
+              <div style={{ height: '220px', width: '100%' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={data?.leaveByType || []} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                    <XAxis type="number" />
+                    <YAxis dataKey="name" type="category" width={80} />
+                    <Tooltip />
+                    <Bar dataKey="count" fill="#2563eb" radius={[0, 4, 4, 0]} name="Days Taken" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem' }}>
+              <h3 style={{ margin: '0 0 0.75rem 0', fontSize: '0.95rem', color: '#0f172a' }}>Top 5 Frequent Late-Comers (Month)</h3>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid #e2e8f0', color: '#64748b' }}>
+                    <th style={{ padding: '0.5rem 0' }}>Employee</th>
+                    <th style={{ padding: '0.5rem 0' }}>Department</th>
+                    <th style={{ padding: '0.5rem 0', textAlign: 'right' }}>Occurrences</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {(data?.topLateComers || []).map((emp) => (
+                    <tr key={emp.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                      <td style={{ padding: '0.5rem 0', fontWeight: '600', color: '#1e293b' }}>{emp.name}</td>
+                      <td style={{ padding: '0.5rem 0', color: '#64748b' }}>{emp.dept}</td>
+                      <td style={{ padding: '0.5rem 0', textAlign: 'right', fontWeight: '700', color: '#d97706' }}>
+                        {emp.count} times
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* 2. ADMIN DASHBOARD CONTENT */}
+      {/* ------------------------------------------------------------- */}
+      {isAdmin && (
+        <>
+          {/* Admin KPI Cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Active Headcount</div>
+              <div style={{ fontSize: '1.6rem', fontWeight: '700', color: '#0f172a', marginTop: '0.25rem' }}>{data?.headcount || 0}</div>
+            </div>
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Attrition Rate (YTD)</div>
+              <div style={{ fontSize: '1.6rem', fontWeight: '700', color: '#16a34a', marginTop: '0.25rem' }}>{data?.attritionYtd || '0%'}</div>
+            </div>
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Monthly Payroll Cost</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#2563eb', marginTop: '0.25rem' }}>
+                PKR {(data?.payrollCost || 0).toLocaleString()}
+              </div>
+            </div>
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem' }}>
+              <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase' }}>Average Gross Salary</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#0f172a', marginTop: '0.25rem' }}>
+                PKR {(data?.avgSalary || 0).toLocaleString()}
+              </div>
+            </div>
+          </div>
+
+          {/* Recharts: Headcount By Dept & Payroll Cost By Dept */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.25rem' }}>
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem' }}>
+              <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', color: '#0f172a' }}>Headcount by Department</h3>
+              <div style={{ height: '240px', width: '100%' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={data?.headcountByDept || []}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="dept" />
+                    <YAxis />
+                    <Tooltip />
+                    <Bar dataKey="count" fill="#2563eb" radius={[4, 4, 0, 0]} name="Headcount" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem' }}>
+              <h3 style={{ margin: '0 0 1rem 0', fontSize: '0.95rem', color: '#0f172a' }}>Payroll Cost by Department (PKR)</h3>
+              <div style={{ height: '240px', width: '100%' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={data?.payrollByDept || []}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="dept" />
+                    <YAxis />
+                    <Tooltip formatter={(value) => `PKR ${value.toLocaleString()}`} />
+                    <Bar dataKey="cost" fill="#16a34a" radius={[4, 4, 0, 0]} name="Monthly Cost" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+
+          {/* Last Audit Entries */}
+          <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.25rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+              <h3 style={{ margin: 0, fontSize: '0.95rem', color: '#0f172a' }}>Recent System Audit Trails</h3>
+              <Link to="/audit" style={{ fontSize: '0.8rem', color: '#2563eb', fontWeight: '600' }}>
+                View Full Audit →
+              </Link>
+            </div>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.85rem' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid #e2e8f0', color: '#64748b' }}>
+                  <th style={{ padding: '0.5rem 0' }}>Timestamp</th>
+                  <th style={{ padding: '0.5rem 0' }}>Actor</th>
+                  <th style={{ padding: '0.5rem 0' }}>Action</th>
+                  <th style={{ padding: '0.5rem 0' }}>Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(data?.recentAudits || []).map((a) => (
+                  <tr key={a.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '0.5rem 0', color: '#64748b', whiteSpace: 'nowrap' }}>
+                      {a.timestamp ? new Date(a.timestamp).toLocaleString() : '-'}
+                    </td>
+                    <td style={{ padding: '0.5rem 0', fontWeight: '600', color: '#1e293b' }}>{a.actor}</td>
+                    <td style={{ padding: '0.5rem 0' }}>
+                      <span style={{
+                        padding: '0.15rem 0.45rem',
+                        borderRadius: '4px',
+                        fontSize: '0.75rem',
+                        fontWeight: '600',
+                        backgroundColor: '#e0e7ff',
+                        color: '#3730a3'
+                      }}>
+                        {a.action}
+                      </span>
+                    </td>
+                    <td style={{ padding: '0.5rem 0', color: '#475569' }}>{a.details}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
     </div>
   );
 };

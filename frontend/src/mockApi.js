@@ -806,13 +806,72 @@ export default async function mockAdapter(config) {
   }
 
   // 8. Dashboards & Audit
-  if (pathname === '/dashboard/admin' || pathname === '/dashboard/hr') {
+  if (pathname === '/dashboard/hr') {
+    const from = params.get('from') || '';
+    const to = params.get('to') || '';
+    const deptId = params.get('departmentId') || '';
+
     return respond({
-      totalEmployees: employees.length,
-      presentToday: attendance.filter((a) => a.date === todayStr && a.status === 'present').length,
-      onLeaveToday: leaves.filter((l) => l.status === 'approved').length,
-      pendingCorrections: corrections.filter((c) => c.status === 'pending').length,
-      monthlyPayroll: 420000
+      headcount: employees.length || 24,
+      presentToday: 21,
+      onLeaveToday: 2,
+      lateToday: 1,
+      pendingApprovals: corrections.filter((c) => c.status === 'pending').length + leaves.filter((l) => l.status === 'pending').length || 3,
+      attendanceTrend: [
+        { day: 'Mon', present: 22, late: 2 },
+        { day: 'Tue', present: 23, late: 1 },
+        { day: 'Wed', present: 21, late: 3 },
+        { day: 'Thu', present: 24, late: 0 },
+        { day: 'Fri', present: 21, late: 1 }
+      ],
+      absenteeismByDept: [
+        { dept: 'Engineering', rate: 3.8 },
+        { dept: 'HR', rate: 1.2 },
+        { dept: 'Finance', rate: 2.5 }
+      ],
+      leaveByType: [
+        { name: 'Annual', count: 12 },
+        { name: 'Sick', count: 6 },
+        { name: 'Casual', count: 5 },
+        { name: 'Unpaid', count: 1 }
+      ],
+      topLateComers: [
+        { id: 'EMP-005', name: 'Zainab Ahmed', dept: 'Engineering', count: 4 },
+        { id: 'EMP-003', name: 'Bilal Tariq', dept: 'Finance', count: 3 },
+        { id: 'EMP-008', name: 'Usman Farooq', dept: 'Engineering', count: 2 },
+        { id: 'EMP-002', name: 'Ali Khan', dept: 'Engineering', count: 1 },
+        { id: 'EMP-006', name: 'Hina Malik', dept: 'HR', count: 1 }
+      ],
+      departments
+    });
+  }
+
+  if (pathname === '/dashboard/admin') {
+    const from = params.get('from') || '';
+    const to = params.get('to') || '';
+    const deptId = params.get('departmentId') || '';
+
+    const count = employees.length || 24;
+    const totalPayroll = 3840000;
+    const avgSalary = Math.round(totalPayroll / count);
+
+    return respond({
+      headcount: count,
+      attritionYtd: '4.2%',
+      payrollCost: totalPayroll,
+      avgSalary: avgSalary,
+      headcountByDept: [
+        { dept: 'Engineering', count: 13 },
+        { dept: 'Finance', count: 6 },
+        { dept: 'HR', count: 5 }
+      ],
+      payrollByDept: [
+        { dept: 'Engineering', cost: 2150000 },
+        { dept: 'Finance', cost: 960000 },
+        { dept: 'HR', cost: 730000 }
+      ],
+      recentAudits: auditLogs.slice(0, 5),
+      departments
     });
   }
 
@@ -838,13 +897,25 @@ export default async function mockAdapter(config) {
 
   // 9. AI Assistant
   if (pathname === '/ai/chat' && method === 'POST') {
-    const q = body.message?.toLowerCase() || '';
+    const q = (body.message || '').toLowerCase();
     let reply = `Based on company policy and your role (${currentUser?.role || 'user'}), standard working hours are 09:00 with a 15-minute grace period. Your remaining leave quota is healthy.`;
-    if (q.includes('leave') || q.includes('vacation')) {
+
+    if (q.includes('colleague') || q.includes("ali's salary") || (currentUser?.role === 'employee' && (q.includes('salary of') || q.includes('someone else') || q.includes('other employee')))) {
+      reply = 'Access Denied: Data scope restriction enforced. As an employee, you are strictly authorized to view your own salary and payslip records. Accessing colleague compensation data is prohibited by company policy and role permissions.';
+    } else if (q.includes('sick leave') || q.includes('sick leaves')) {
+      reply = 'You currently have 8 sick leaves remaining for the current calendar year. Sick leave is fully paid and does not require advance approval for emergencies under 2 consecutive days.';
+    } else if (q.includes('monday and tuesday') || q.includes('smart leave')) {
+      reply = 'I have identified your request for Monday and Tuesday off (Annual Leave). You can navigate to the Leave tab where the Smart Leave Assistant has parsed your dates, or ask me to draft it for you.';
+    } else if (q.includes('attendance summary') || q.includes('attendance trend')) {
+      reply = 'Weekly attendance compliance is at 94.8% with an average check-in time of 09:08 AM. 1 late arrival recorded today.';
+    } else if (q.includes('late today') || q.includes('who was late')) {
+      reply = 'Today, 1 employee checked in after the 09:15 grace threshold: Ali Khan (checked in at 09:22 AM).';
+    } else if (q.includes('payroll') || q.includes('total monthly payroll')) {
+      reply = 'Total monthly payroll liability for the current cycle is PKR 3,840,000 across 24 active employees with an average salary of PKR 160,000.';
+    } else if (q.includes('leave') || q.includes('vacation')) {
       reply = 'Annual leave quota is 14 days per calendar year. You currently have 11 annual leave days remaining. Weekends and gazetted holidays are excluded from deduction.';
-    } else if (q.includes('payroll') || q.includes('salary') || q.includes('tax')) {
-      reply = 'Gross salary is structured as 1.5x basic salary (Basic: 100%, HRA: 40%, Medical: 10%). Tax withholding follows statutory annual tax slabs calculated across 12 monthly cycles.';
     }
+
     return respond({ reply, label: 'AI-generated' });
   }
 
