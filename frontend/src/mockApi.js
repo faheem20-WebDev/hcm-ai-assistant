@@ -716,22 +716,61 @@ export default async function mockAdapter(config) {
   if (pathname === '/payroll/runs') {
     if (method === 'POST') {
       const month = body.month || '2026-10';
+      const existing = payrollRuns.find((p) => p.month === month);
+      if (existing && existing.isFinalized) {
+        return respond({ error: `Payroll run for ${month} is already finalized and locked.` }, 422);
+      }
+
+      const items = employees.map((e) => {
+        const basic = e.basicSalary || 100000;
+        const gross = e.grossSalary || basic * 1.5;
+        const deductions = 0;
+        const annualGross = gross * 12;
+        let annualTax = 0;
+        if (annualGross > 3600000) {
+          annualTax = 510000 + (annualGross - 3600000) * 0.35;
+        } else if (annualGross > 2400000) {
+          annualTax = 210000 + (annualGross - 2400000) * 0.25;
+        } else if (annualGross > 1200000) {
+          annualTax = 30000 + (annualGross - 1200000) * 0.15;
+        } else if (annualGross > 600000) {
+          annualTax = (annualGross - 600000) * 0.05;
+        }
+        const tax = Math.round(annualTax / 12);
+        const net = Math.round(gross - deductions - tax);
+
+        return {
+          employeeId: e.id,
+          name: e.name,
+          basic,
+          gross,
+          deductions,
+          tax,
+          net
+        };
+      });
+
+      const totalGross = items.reduce((acc, i) => acc + i.gross, 0);
+      const totalDeductions = items.reduce((acc, i) => acc + i.deductions + i.tax, 0);
+      const totalNet = items.reduce((acc, i) => acc + i.net, 0);
+
+      if (existing) {
+        existing.items = items;
+        existing.totalGross = totalGross;
+        existing.totalDeductions = totalDeductions;
+        existing.totalNet = totalNet;
+        return respond(existing, 200);
+      }
+
       const run = {
         id: `pr-${month}`,
         month,
-        totalGross: 420000,
-        totalDeductions: 15000,
-        totalNet: 405000,
+        totalGross,
+        totalDeductions,
+        totalNet,
         isFinalized: false,
-        items: employees.map((e) => ({
-          employeeId: e.id,
-          name: e.name,
-          basic: e.basicSalary,
-          gross: e.grossSalary,
-          tax: Math.round(e.grossSalary * 0.05),
-          deductions: 0,
-          net: Math.round(e.grossSalary * 0.95)
-        }))
+        finalizedAt: null,
+        items
       };
       payrollRuns.unshift(run);
       return respond(run, 201);
@@ -750,12 +789,19 @@ export default async function mockAdapter(config) {
   }
 
   if (pathname.startsWith('/payroll/runs/') && pathname.endsWith('/finalize') && method === 'PATCH') {
+    if (currentUser && currentUser.role !== 'admin') {
+      return respond({ error: 'Permission denied: Only administrators can finalize payroll runs.' }, 403);
+    }
     const id = pathname.split('/')[3];
     const run = payrollRuns.find((p) => p.id === id);
-    if (run) {
-      run.isFinalized = true;
-      run.finalizedAt = new Date().toISOString();
+    if (!run) {
+      return respond({ error: 'Payroll run not found.' }, 404);
     }
+    if (run.isFinalized) {
+      return respond({ error: 'This payroll run is already locked and finalized.' }, 422);
+    }
+    run.isFinalized = true;
+    run.finalizedAt = new Date().toISOString();
     return respond({ message: 'Payroll run finalized and locked.', run });
   }
 
