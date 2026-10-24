@@ -35,11 +35,12 @@ In order of execution:
 8. `Audit.jsx`: [DONE] Filterable log table, expandable JSON metadata drawer/card.
 9. `Organization.jsx`: [DONE] Tabbed settings (geofence, departments, designations, leaves, holidays).
 10. `Profile.jsx`: [DONE] Profile card, editable contact form, avatar banner.
-11. `AIAssistant.jsx`: [NEXT UP] Chat bubbles, suggested prompts chips, streaming indicator, AI badges.
+11. `AIAssistant.jsx`: [DONE] Chat bubbles, suggested prompts chips, streaming indicator, AI badges.
 
-### 5. Dark Mode & 375px Responsiveness: [PENDING FINAL PASS]
-- Shell and auth support dark mode. Pages will inherit dark mode once inline styles are replaced with theme classes.
-- Final build verification: `npm run build`.
+### 5. Dark Mode & 375px Responsiveness: [DONE]
+- Shell, Auth, Shared Components, and all 11 application pages now use the theme CSS variables and utility classes.
+- Responsive breakpoints down to 375px supported across all views.
+- Verified build via `npm run build`.
 
 ---
 
