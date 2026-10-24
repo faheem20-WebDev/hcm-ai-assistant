@@ -31,16 +31,20 @@
 - **Compact Auth Card Layout (Item 1)**: Single centered compact card (max-width 900px, 92% width, min-height 520px, 24px radius, soft shadow, soft page background #EEF0FF / #0F1224) with 45% left gradient robot panel and 55% clean form surface, responsive down to 375px.
 - **Advanced 3D-Style Robot (Item 2)**: Rebuilt SVG robot with glass visor, glowing ear pieces, rotating core ring, animated mini equalizer bars, hover jets, ground shadow, speech bubble, red error state, and eye-covering password focus interaction.
 
+- **Design System & Theme Tokens (Step 1)**: Unified `src/styles/theme.css` with dark/light mode tokens, Inter typography, layered shadows, custom scrollbar, animations, and reusable classes (`.card`, `.btn`, `.input`, `.badge`, `.table`, `.modal`, `.kpi-card`, `.ai-badge`).
+
 ### IN PROGRESS
-- None.
+- **Layout Shell Redesign (Step 2)**: Sidebar gradient with SVG robot icon and glowing pills, collapsible desktop drawer, topbar breadcrumb, animated sun/moon dark mode toggle, and notification bell.
 
 ### PENDING
-- None. All requested styling, compact card layout, and 3D robot interactions are complete and verified with production build.
+- Shared components (skeleton shimmer, empty illustration, error retry).
+- Page restyling (dashboards, employees, organization, attendance, leave, payroll, profile, audit, AI).
+- Dark mode toggle persistence & 375px responsive audit.
 
 ## Known Issues
-- None. All auth pages (Setup, Login, ChangePassword, PIN verify, PIN setup, Forgot password) compile cleanly with 0 build errors.
+- None. Theme system compiles and is active across the app.
 
 ## Ready-to-Paste Next Prompt
 ```text
-Compact auth card layout and advanced 3D interactive robot are fully implemented across all auth views with production build verified. The application is ready for next feature additions or backend integration.
+Step 1 (Design System theme.css) is complete. Proceed with Step 2: Redesign the Layout shell in frontend/src/components/Layout.jsx and Layout.css (sidebar gradient, robot logo, SVG icons, active glowing pill, collapse button, mobile drawer, topbar with animated dark-mode toggle, breadcrumb and unread notification pulse).
 ```
