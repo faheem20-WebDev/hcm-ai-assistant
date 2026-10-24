@@ -30,8 +30,8 @@ In order of execution:
 3. `HrUsers.jsx`: [DONE] HR directory table, add HR modal, password copy alert banner, reset queue.
 4. `Attendance.jsx`: [DONE] Check-in/out hero card with geofence indicator, calendar/history table, correction modal.
 5. `Leave.jsx`: [DONE] Balance cards, Smart Leave AI prompt box, application modal, approval queue.
-6. `Payroll.jsx` & `Payslips.jsx`: [NEXT UP] Payroll run overview, calculation table, finalization lock, employee payslip list.
-7. `Announcements.jsx`: Priority tag cards, composer modal, pinned bulletin styling.
+6. `Payroll.jsx` & `Payslips.jsx`: [DONE] Payroll run overview, calculation table, finalization lock, employee payslip list.
+7. `Announcements.jsx`: [NEXT UP] Priority tag cards, composer modal, pinned bulletin styling.
 8. `Audit.jsx`: Filterable log table, expandable JSON metadata drawer/card.
 9. `Organization.jsx`: Tabbed settings (geofence, departments, designations, leaves, holidays).
 10. `Profile.jsx`: Profile card, editable contact form, avatar banner.
