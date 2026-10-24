@@ -7,6 +7,8 @@ let needsSetup = true;
 
 let users = [];
 
+let resetRequests = [];
+
 let settings = {
   companyName: 'Acme HCM Tech',
   workStartTime: '09:00',
