@@ -201,6 +201,7 @@ const Login = () => {
       subtitle={pageSubtitle}
       isPasswordFocused={isPasswordFocused}
       hasError={Boolean(error || forgotError)}
+      loading={loading}
     >
       {message && (
         <div style={{

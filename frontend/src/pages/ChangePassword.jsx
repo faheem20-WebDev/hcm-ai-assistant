@@ -69,6 +69,7 @@ const ChangePassword = () => {
       subtitle={pageSubtitle}
       isPasswordFocused={isPasswordFocused}
       hasError={Boolean(error)}
+      loading={loading}
     >
       {error && (
         <div className="auth-error-slide">

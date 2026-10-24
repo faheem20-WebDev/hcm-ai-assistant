@@ -51,6 +51,7 @@ const Setup = () => {
       subtitle="Initialize your organization workspace and primary administrator"
       isPasswordFocused={isPasswordFocused}
       hasError={Boolean(error)}
+      loading={loading}
     >
       {error && (
         <div className="auth-error-slide">
