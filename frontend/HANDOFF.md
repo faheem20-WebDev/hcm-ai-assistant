@@ -17,8 +17,9 @@
 - **Dashboards (`/dashboard`)**: Role-scoped dashboards for Admin, HR, and Employee. Recharts visualizations (attendance trends, department headcounts), date/department filtering, and AI Summarize button (`POST /ai/summary`) with visible `AI-generated` badge.
 - **AI Chat Assistant (`/ai`)**: Role-aware conversational interface (`POST /ai/chat`), suggested prompts, employee colleague salary refusal guardrail, and `AI-generated` response badges.
 
+- **Employees Directory (`/frontend/src/pages/Employees.jsx`)**: Full directory table with search, department & status filters, responsive layout, register modal with copyable temp password, edit employee details modal, and admin reset password & reset PIN actions.
+
 ### IN PROGRESS
-- **Employees Directory (`/frontend/src/pages/Employees.jsx`)**: Placeholder needs replacement with full employee directory table, search & filters, pagination, register employee modal with copyable temp password, and edit profile details.
 - **Login PIN Step & Forgot Password (`/frontend/src/pages/Login.jsx`)**: Adding mandatory 5-digit PIN step for HR and Employee logins (Admin bypasses), and self-service Forgot Password request modal.
 
 ### PENDING

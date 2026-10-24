@@ -432,7 +432,7 @@ export default async function mockAdapter(config) {
 
   if (pathname.startsWith('/users/') && pathname.endsWith('/reset-password') && method === 'POST') {
     const id = pathname.split('/')[2];
-    const u = users.find((x) => x.id === id);
+    const u = users.find((x) => x.id === id || x.employeeId === id || x.id === `usr-${id.toLowerCase()}`);
     const tempPassword = `Reset${Math.floor(100000 + Math.random() * 900000)}!`;
     if (u) {
       u.password = tempPassword;
@@ -441,13 +441,26 @@ export default async function mockAdapter(config) {
     return respond({ tempPassword });
   }
 
+  if (pathname.startsWith('/users/') && pathname.endsWith('/reset-pin') && method === 'POST') {
+    const id = pathname.split('/')[2];
+    const u = users.find((x) => x.id === id || x.employeeId === id || x.id === `usr-${id.toLowerCase()}`);
+    if (u) {
+      u.pin = null;
+    }
+    return respond({ message: 'User PIN has been reset.' });
+  }
+
   // 3. Employees
   if (pathname === '/employees') {
     if (method === 'GET') {
       const search = params.get('search')?.toLowerCase() || '';
-      const filtered = employees.filter((e) =>
+      const dept = params.get('departmentId');
+      const status = params.get('status');
+      let filtered = employees.filter((e) =>
         e.name.toLowerCase().includes(search) || e.email.toLowerCase().includes(search)
       );
+      if (dept) filtered = filtered.filter((e) => e.departmentId === dept);
+      if (status) filtered = filtered.filter((e) => e.status === status);
       return respond({ items: filtered, total: filtered.length, page: 1, limit: 50 });
     }
     if (method === 'POST') {
