@@ -5,7 +5,9 @@ import Empty from '../components/Empty';
 import ErrorBox from '../components/ErrorBox';
 
 const HrUsers = () => {
+  const [activeTab, setActiveTab] = useState('officers'); // 'officers' | 'requests'
   const [hrUsers, setHrUsers] = useState([]);
+  const [resetRequests, setResetRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -24,8 +26,12 @@ const HrUsers = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.get('/users/hr');
-      setHrUsers(res.data?.items || []);
+      const [hrRes, reqRes] = await Promise.all([
+        api.get('/users/hr'),
+        api.get('/auth/reset-requests').catch(() => ({ data: { items: [] } }))
+      ]);
+      setHrUsers(hrRes.data?.items || []);
+      setResetRequests(reqRes.data?.items || []);
     } catch (err) {
       setError(err?.response?.data?.error || 'Failed to fetch HR officers.');
     } finally {
@@ -98,6 +104,57 @@ const HrUsers = () => {
     }
   };
 
+  const handleResetPin = async (id, userEmail) => {
+    if (!window.confirm(`Reset 5-digit login PIN for ${userEmail}? They will be prompted to create a new PIN upon login.`)) return;
+    setActionLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      await api.post(`/users/${id}/reset-pin`);
+      setSuccess(`5-digit PIN for ${userEmail} has been reset.`);
+    } catch (err) {
+      setError(err?.response?.data?.error || 'Failed to reset PIN.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleApproveResetRequest = async (reqItem) => {
+    setActionLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      const res = await api.post(`/auth/reset-requests/${reqItem.id}/approve`);
+      setTempPassInfo({
+        userEmail: reqItem.email,
+        tempPassword: res.data?.tempPassword || 'Reset999999!',
+        actionType: 'Reset Request Approved'
+      });
+      setSuccess(`Reset request approved for ${reqItem.email}.`);
+      fetchHrUsers();
+    } catch (err) {
+      setError(err?.response?.data?.error || 'Failed to approve reset request.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRejectResetRequest = async (reqItem) => {
+    if (!window.confirm(`Reject password reset request for ${reqItem.email}?`)) return;
+    setActionLoading(true);
+    setError(null);
+    setSuccess(null);
+    try {
+      await api.post(`/auth/reset-requests/${reqItem.id}/reject`);
+      setSuccess(`Reset request rejected for ${reqItem.email}.`);
+      fetchHrUsers();
+    } catch (err) {
+      setError(err?.response?.data?.error || 'Failed to reject reset request.');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleCopyPassword = () => {
     if (tempPassInfo?.tempPassword) {
       navigator.clipboard.writeText(tempPassInfo.tempPassword);
@@ -106,32 +163,86 @@ const HrUsers = () => {
     }
   };
 
+  const pendingRequestsCount = resetRequests.filter((r) => r.status === 'pending').length;
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#0f172a', margin: '0 0 0.25rem 0' }}>
-            HR Users Administration
+            HR Users & Access Administration
           </h1>
           <p style={{ margin: 0, color: '#64748b', fontSize: '0.875rem' }}>
-            Provision and manage Human Resource officer credentials, password resets, and account access.
+            Provision and manage Human Resource officer credentials, password resets, PIN resets, and incoming reset requests.
           </p>
         </div>
 
+        {activeTab === 'officers' && (
+          <button
+            onClick={() => setShowCreateModal(true)}
+            style={{
+              backgroundColor: '#2563eb',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '0.6rem 1.1rem',
+              fontSize: '0.875rem',
+              fontWeight: '600',
+              cursor: 'pointer'
+            }}
+          >
+            + Create HR Login
+          </button>
+        )}
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid #e2e8f0', marginBottom: '1.5rem' }}>
         <button
-          onClick={() => setShowCreateModal(true)}
+          onClick={() => setActiveTab('officers')}
           style={{
-            backgroundColor: '#2563eb',
-            color: '#ffffff',
+            background: 'none',
             border: 'none',
-            borderRadius: '6px',
-            padding: '0.6rem 1.1rem',
-            fontSize: '0.875rem',
-            fontWeight: '600',
+            borderBottom: activeTab === 'officers' ? '2px solid #2563eb' : '2px solid transparent',
+            color: activeTab === 'officers' ? '#2563eb' : '#64748b',
+            fontWeight: activeTab === 'officers' ? '600' : '500',
+            padding: '0.6rem 0.5rem',
+            fontSize: '0.9rem',
             cursor: 'pointer'
           }}
         >
-          + Create HR Login
+          HR Officers ({hrUsers.length})
+        </button>
+
+        <button
+          onClick={() => setActiveTab('requests')}
+          style={{
+            background: 'none',
+            border: 'none',
+            borderBottom: activeTab === 'requests' ? '2px solid #2563eb' : '2px solid transparent',
+            color: activeTab === 'requests' ? '#2563eb' : '#64748b',
+            fontWeight: activeTab === 'requests' ? '600' : '500',
+            padding: '0.6rem 0.5rem',
+            fontSize: '0.9rem',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}
+        >
+          Password Reset Requests
+          {pendingRequestsCount > 0 && (
+            <span style={{
+              backgroundColor: '#ef4444',
+              color: '#ffffff',
+              borderRadius: '9999px',
+              fontSize: '0.75rem',
+              fontWeight: '700',
+              padding: '0.1rem 0.45rem'
+            }}>
+              {pendingRequestsCount}
+            </span>
+          )}
         </button>
       </div>
 
@@ -159,7 +270,7 @@ const HrUsers = () => {
             </button>
           </div>
           <p style={{ margin: 0, fontSize: '0.85rem', color: '#334155' }}>
-            Provide these temporary credentials to <strong>{tempPassInfo.userEmail}</strong>. They will be forced to change this password upon first sign in.
+            Provide these temporary credentials to <strong>{tempPassInfo.userEmail}</strong>. They will be forced to change this password and setup their 5-digit PIN upon sign in.
           </p>
           <div style={{
             display: 'flex',
@@ -201,33 +312,32 @@ const HrUsers = () => {
         </div>
       )}
 
-      <ErrorBox error={error} />
+      <ErrorBox error={error} onRetry={fetchHrUsers} />
 
-      {loading && <Loading message="Loading HR accounts..." />}
-
-      {!loading && (
-        hrUsers.length === 0 ? (
+      {/* TAB 1: HR OFFICERS */}
+      {activeTab === 'officers' && (
+        loading ? (
+          <Loading message="Loading HR accounts..." />
+        ) : hrUsers.length === 0 ? (
           <Empty
-            title="No HR users found"
-            description="Create HR users to allow staff members to manage attendance, leave, and draft payroll."
-            action={
-              <button
-                onClick={() => setShowCreateModal(true)}
-                style={{ padding: '0.5rem 1rem', background: '#2563eb', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-              >
-                Create HR Login
-              </button>
-            }
+            title="No HR Officers Found"
+            description="No HR user accounts have been provisioned yet. Click '+ Create HR Login' to provision access."
           />
         ) : (
-          <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
-              <thead style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                <tr>
-                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Name</th>
-                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Email</th>
-                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Status</th>
-                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>First-Login Reset</th>
+          <div style={{
+            backgroundColor: '#ffffff',
+            border: '1px solid #e2e8f0',
+            borderRadius: '8px',
+            overflowX: 'auto',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)'
+          }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem', minWidth: '650px' }}>
+              <thead>
+                <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Officer Name</th>
+                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Email Address</th>
+                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Account Status</th>
+                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Password Status</th>
                   <th style={{ padding: '0.85rem 1rem', textAlign: 'right', color: '#475569', fontWeight: '600' }}>Actions</th>
                 </tr>
               </thead>
@@ -252,37 +362,152 @@ const HrUsers = () => {
                       {hr.mustChangePassword ? 'Pending Change' : 'Active'}
                     </td>
                     <td style={{ padding: '0.85rem 1rem', textAlign: 'right' }}>
-                      <button
-                        onClick={() => handleResetPassword(hr.id, hr.email)}
-                        disabled={actionLoading}
-                        style={{
-                          marginRight: '0.5rem',
-                          background: 'none',
-                          border: '1px solid #cbd5e1',
-                          borderRadius: '4px',
-                          padding: '0.3rem 0.6rem',
-                          cursor: 'pointer',
-                          fontSize: '0.75rem'
-                        }}
-                      >
-                        Reset Password
-                      </button>
-                      {hr.isActive && (
+                      <div style={{ display: 'inline-flex', gap: '0.4rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                         <button
-                          onClick={() => handleDeactivate(hr.id, hr.email)}
+                          onClick={() => handleResetPassword(hr.id, hr.email)}
                           disabled={actionLoading}
                           style={{
-                            background: 'none',
-                            border: '1px solid #fecaca',
-                            color: '#dc2626',
+                            backgroundColor: '#fef3c7',
+                            border: '1px solid #fde68a',
+                            color: '#92400e',
                             borderRadius: '4px',
                             padding: '0.3rem 0.6rem',
                             cursor: 'pointer',
-                            fontSize: '0.75rem'
+                            fontSize: '0.75rem',
+                            fontWeight: '600'
                           }}
                         >
-                          Deactivate
+                          Reset Pwd
                         </button>
+                        <button
+                          onClick={() => handleResetPin(hr.id, hr.email)}
+                          disabled={actionLoading}
+                          style={{
+                            backgroundColor: '#e0e7ff',
+                            border: '1px solid #c7d2fe',
+                            color: '#3730a3',
+                            borderRadius: '4px',
+                            padding: '0.3rem 0.6rem',
+                            cursor: 'pointer',
+                            fontSize: '0.75rem',
+                            fontWeight: '600'
+                          }}
+                        >
+                          Reset PIN
+                        </button>
+                        {hr.isActive && (
+                          <button
+                            onClick={() => handleDeactivate(hr.id, hr.email)}
+                            disabled={actionLoading}
+                            style={{
+                              backgroundColor: '#fee2e2',
+                              border: '1px solid #fecaca',
+                              color: '#dc2626',
+                              borderRadius: '4px',
+                              padding: '0.3rem 0.6rem',
+                              cursor: 'pointer',
+                              fontSize: '0.75rem',
+                              fontWeight: '600'
+                            }}
+                          >
+                            Deactivate
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )
+      )}
+
+      {/* TAB 2: PASSWORD RESET REQUESTS */}
+      {activeTab === 'requests' && (
+        resetRequests.length === 0 ? (
+          <Empty
+            title="No Reset Requests"
+            description="Zero password reset requests pending. Requests submitted by users on the login page will appear here."
+          />
+        ) : (
+          <div style={{
+            backgroundColor: '#ffffff',
+            border: '1px solid #e2e8f0',
+            borderRadius: '8px',
+            overflowX: 'auto',
+            boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.05)'
+          }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem', minWidth: '650px' }}>
+              <thead>
+                <tr style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>User Email</th>
+                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Reason / Note</th>
+                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Requested At</th>
+                  <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Status</th>
+                  <th style={{ padding: '0.85rem 1rem', textAlign: 'right', color: '#475569', fontWeight: '600' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {resetRequests.map((req) => (
+                  <tr key={req.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <td style={{ padding: '0.85rem 1rem', fontWeight: '600', color: '#0f172a' }}>{req.email}</td>
+                    <td style={{ padding: '0.85rem 1rem', color: '#64748b' }}>{req.reason || '—'}</td>
+                    <td style={{ padding: '0.85rem 1rem', color: '#64748b', fontSize: '0.8rem' }}>
+                      {new Date(req.createdAt).toLocaleString()}
+                    </td>
+                    <td style={{ padding: '0.85rem 1rem' }}>
+                      <span style={{
+                        padding: '0.2rem 0.5rem',
+                        borderRadius: '4px',
+                        fontSize: '0.75rem',
+                        fontWeight: '600',
+                        backgroundColor:
+                          req.status === 'approved' ? '#dcfce7' : req.status === 'rejected' ? '#fee2e2' : '#fef3c7',
+                        color:
+                          req.status === 'approved' ? '#15803d' : req.status === 'rejected' ? '#b91c1c' : '#b45309'
+                      }}>
+                        {req.status ? req.status.toUpperCase() : 'PENDING'}
+                      </span>
+                    </td>
+                    <td style={{ padding: '0.85rem 1rem', textAlign: 'right' }}>
+                      {req.status === 'pending' ? (
+                        <div style={{ display: 'inline-flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
+                          <button
+                            onClick={() => handleApproveResetRequest(req)}
+                            disabled={actionLoading}
+                            style={{
+                              backgroundColor: '#2563eb',
+                              color: '#ffffff',
+                              border: 'none',
+                              borderRadius: '4px',
+                              padding: '0.35rem 0.65rem',
+                              fontSize: '0.75rem',
+                              fontWeight: '600',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Approve & Reset
+                          </button>
+                          <button
+                            onClick={() => handleRejectResetRequest(req)}
+                            disabled={actionLoading}
+                            style={{
+                              backgroundColor: '#fee2e2',
+                              border: '1px solid #fecaca',
+                              color: '#b91c1c',
+                              borderRadius: '4px',
+                              padding: '0.35rem 0.65rem',
+                              fontSize: '0.75rem',
+                              fontWeight: '600',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      ) : (
+                        <span style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Completed</span>
                       )}
                     </td>
                   </tr>
@@ -326,7 +551,7 @@ const HrUsers = () => {
                   placeholder="e.g. Sarah Jenkins"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.875rem' }}
+                  style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.875rem', boxSizing: 'border-box' }}
                 />
               </div>
 
@@ -338,7 +563,7 @@ const HrUsers = () => {
                   placeholder="sarah.hr@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.875rem' }}
+                  style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.875rem', boxSizing: 'border-box' }}
                 />
               </div>
 

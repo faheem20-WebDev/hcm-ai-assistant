@@ -7,6 +7,8 @@ let needsSetup = true;
 
 let users = [];
 
+let resetRequests = [];
+
 let settings = {
   companyName: 'Acme HCM Tech',
   workStartTime: '09:00',
@@ -43,114 +45,13 @@ let holidays = [
   { id: 'hol-3', name: 'Independence Day', date: '2026-08-14' }
 ];
 
-let employees = [
-  {
-    id: 'EMP-001',
-    name: 'Sarah HR',
-    email: 'hr@company.com',
-    departmentId: 'dept-2',
-    designationId: 'des-2',
-    status: 'active',
-    basicSalary: 120000,
-    grossSalary: 180000,
-    phone: '+92 321 7654321',
-    address: 'Gulshan-e-Iqbal, Karachi',
-    joinedDate: '2025-01-15'
-  },
-  {
-    id: 'EMP-002',
-    name: 'Ali Khan',
-    email: 'emp@company.com',
-    departmentId: 'dept-1',
-    designationId: 'des-1',
-    status: 'active',
-    basicSalary: 160000,
-    grossSalary: 240000,
-    phone: '+92 300 1234567',
-    address: 'Clifton, Karachi',
-    joinedDate: '2025-02-01'
-  }
-];
-
-let attendance = [
-  {
-    id: 'att-1',
-    employeeId: 'EMP-002',
-    date: '2026-10-23',
-    checkIn: '09:05:00',
-    checkOut: '17:35:00',
-    status: 'present',
-    workHours: 8.5
-  }
-];
-
+let employees = [];
+let attendance = [];
 let corrections = [];
-
-let leaves = [
-  {
-    id: 'lev-1',
-    employeeId: 'EMP-002',
-    type: 'Annual',
-    startDate: '2026-11-02',
-    endDate: '2026-11-04',
-    days: 3,
-    reason: 'Family event',
-    status: 'approved',
-    comment: 'Approved by HR'
-  }
-];
-
-let notifications = [
-  {
-    id: 'notif-1',
-    title: 'Payroll Draft Generated',
-    message: 'October 2026 payroll draft is ready for review.',
-    isRead: false,
-    createdAt: new Date().toISOString()
-  }
-];
-
-let announcements = [
-  {
-    id: 'ann-1',
-    title: 'Welcome to HCM Lite',
-    content: 'Welcome to the newly deployed Human Capital Management portal.',
-    priority: 'high',
-    createdAt: new Date().toISOString()
-  }
-];
-
-let payrollRuns = [
-  {
-    id: 'pr-2026-09',
-    month: '2026-09',
-    totalGross: 420000,
-    totalDeductions: 15000,
-    totalNet: 405000,
-    isFinalized: true,
-    finalizedAt: '2026-09-30T18:00:00Z',
-    items: [
-      {
-        employeeId: 'EMP-001',
-        name: 'Sarah HR',
-        basic: 120000,
-        gross: 180000,
-        tax: 6000,
-        deductions: 0,
-        net: 174000
-      },
-      {
-        employeeId: 'EMP-002',
-        name: 'Ali Khan',
-        basic: 160000,
-        gross: 240000,
-        tax: 9000,
-        deductions: 0,
-        net: 231000
-      }
-    ]
-  }
-];
+let leaves = [];
+let notifications = [];
+let announcements = [];
+let payrollRuns = [];
 
 let auditLogs = [
   {
@@ -272,6 +173,16 @@ export default async function mockAdapter(config) {
     if (!found) {
       return respond({ error: 'Invalid email or password.' }, 401);
     }
+    // HR and Employee require 5-digit PIN step on every login (Admin has none)
+    if (found.role === 'hr' || found.role === 'employee') {
+      return respond({
+        requirePin: true,
+        hasPin: Boolean(found.pin),
+        email: found.email,
+        role: found.role,
+        name: found.name
+      });
+    }
     const token = `mock-token-${found.id}`;
     return respond({
       token,
@@ -284,6 +195,89 @@ export default async function mockAdapter(config) {
         mustChangePassword: found.mustChangePassword
       }
     });
+  }
+
+  if (pathname === '/auth/pin/verify' && method === 'POST') {
+    const { email, pin } = body;
+    const found = users.find((u) => u.email === email && u.isActive);
+    if (!found) return respond({ error: 'User not found.' }, 404);
+    if (!found.pin || found.pin !== String(pin).trim()) {
+      return respond({ error: 'Invalid 5-digit PIN.' }, 400);
+    }
+    const token = `mock-token-${found.id}`;
+    return respond({
+      token,
+      user: {
+        id: found.id,
+        name: found.name,
+        email: found.email,
+        role: found.role,
+        employeeId: found.employeeId,
+        mustChangePassword: found.mustChangePassword
+      }
+    });
+  }
+
+  if (pathname === '/auth/pin/setup' && method === 'POST') {
+    const { email, pin } = body;
+    const found = users.find((u) => u.email === email && u.isActive);
+    if (!found) return respond({ error: 'User not found.' }, 404);
+    const cleanPin = String(pin || '').trim();
+    if (!/^\d{5}$/.test(cleanPin)) {
+      return respond({ error: 'PIN must be exactly 5 numeric digits.' }, 400);
+    }
+    found.pin = cleanPin;
+    const token = `mock-token-${found.id}`;
+    return respond({
+      token,
+      user: {
+        id: found.id,
+        name: found.name,
+        email: found.email,
+        role: found.role,
+        employeeId: found.employeeId,
+        mustChangePassword: found.mustChangePassword
+      }
+    });
+  }
+
+  if (pathname === '/auth/forgot-password' && method === 'POST') {
+    const { email, reason } = body;
+    const reqItem = {
+      id: `req-${Date.now()}`,
+      email,
+      reason: reason || 'Password reset requested by user',
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    };
+    resetRequests.unshift(reqItem);
+    return respond({ message: 'Password reset request submitted successfully.' }, 201);
+  }
+
+  if (pathname === '/auth/reset-requests' && method === 'GET') {
+    return respond({ items: resetRequests, total: resetRequests.length });
+  }
+
+  if (pathname.startsWith('/auth/reset-requests/') && pathname.endsWith('/approve') && method === 'POST') {
+    const id = pathname.split('/')[3];
+    const reqItem = resetRequests.find((r) => r.id === id);
+    if (!reqItem) return respond({ error: 'Request not found' }, 404);
+    reqItem.status = 'approved';
+    const tempPassword = `Reset${Math.floor(100000 + Math.random() * 900000)}!`;
+    const u = users.find((x) => x.email === reqItem.email);
+    if (u) {
+      u.password = tempPassword;
+      u.mustChangePassword = true;
+    }
+    return respond({ message: 'Request approved.', tempPassword, email: reqItem.email });
+  }
+
+  if (pathname.startsWith('/auth/reset-requests/') && pathname.endsWith('/reject') && method === 'POST') {
+    const id = pathname.split('/')[3];
+    const reqItem = resetRequests.find((r) => r.id === id);
+    if (!reqItem) return respond({ error: 'Request not found' }, 404);
+    reqItem.status = 'rejected';
+    return respond({ message: 'Request rejected.' });
   }
 
   if (pathname === '/auth/change-password' && method === 'POST') {
@@ -430,7 +424,7 @@ export default async function mockAdapter(config) {
 
   if (pathname.startsWith('/users/') && pathname.endsWith('/reset-password') && method === 'POST') {
     const id = pathname.split('/')[2];
-    const u = users.find((x) => x.id === id);
+    const u = users.find((x) => x.id === id || x.employeeId === id || x.id === `usr-${id.toLowerCase()}`);
     const tempPassword = `Reset${Math.floor(100000 + Math.random() * 900000)}!`;
     if (u) {
       u.password = tempPassword;
@@ -439,13 +433,26 @@ export default async function mockAdapter(config) {
     return respond({ tempPassword });
   }
 
+  if (pathname.startsWith('/users/') && pathname.endsWith('/reset-pin') && method === 'POST') {
+    const id = pathname.split('/')[2];
+    const u = users.find((x) => x.id === id || x.employeeId === id || x.id === `usr-${id.toLowerCase()}`);
+    if (u) {
+      u.pin = null;
+    }
+    return respond({ message: 'User PIN has been reset.' });
+  }
+
   // 3. Employees
   if (pathname === '/employees') {
     if (method === 'GET') {
       const search = params.get('search')?.toLowerCase() || '';
-      const filtered = employees.filter((e) =>
+      const dept = params.get('departmentId');
+      const status = params.get('status');
+      let filtered = employees.filter((e) =>
         e.name.toLowerCase().includes(search) || e.email.toLowerCase().includes(search)
       );
+      if (dept) filtered = filtered.filter((e) => e.departmentId === dept);
+      if (status) filtered = filtered.filter((e) => e.status === status);
       return respond({ items: filtered, total: filtered.length, page: 1, limit: 50 });
     }
     if (method === 'POST') {
@@ -789,27 +796,105 @@ export default async function mockAdapter(config) {
   }
 
   if (pathname.startsWith('/payslips/') && pathname.endsWith('/pdf') && method === 'GET') {
-    return respond({ pdfUrl: '#', message: 'PDF generated' });
+    const blob = new Blob(
+      [`%PDF-1.4\n1 0 obj\n<< /Title (Employee Payslip) >>\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF`],
+      { type: 'application/pdf' }
+    );
+    return Promise.resolve({
+      data: blob,
+      status: 200,
+      statusText: 'OK',
+      headers: {
+        'content-type': 'application/pdf',
+        'content-disposition': 'attachment; filename="payslip.pdf"'
+      },
+      config
+    });
   }
 
   // 8. Dashboards & Audit
-  if (pathname === '/dashboard/admin' || pathname === '/dashboard/hr') {
+  if (pathname === '/dashboard/hr') {
+    const from = params.get('from') || '';
+    const to = params.get('to') || '';
+    const deptId = params.get('departmentId') || '';
+
     return respond({
-      totalEmployees: employees.length,
-      presentToday: attendance.filter((a) => a.date === todayStr && a.status === 'present').length,
-      onLeaveToday: leaves.filter((l) => l.status === 'approved').length,
-      pendingCorrections: corrections.filter((c) => c.status === 'pending').length,
-      monthlyPayroll: 420000
+      headcount: employees.length || 24,
+      presentToday: 21,
+      onLeaveToday: 2,
+      lateToday: 1,
+      pendingApprovals: corrections.filter((c) => c.status === 'pending').length + leaves.filter((l) => l.status === 'pending').length || 3,
+      attendanceTrend: [
+        { day: 'Mon', present: 22, late: 2 },
+        { day: 'Tue', present: 23, late: 1 },
+        { day: 'Wed', present: 21, late: 3 },
+        { day: 'Thu', present: 24, late: 0 },
+        { day: 'Fri', present: 21, late: 1 }
+      ],
+      absenteeismByDept: [
+        { dept: 'Engineering', rate: 3.8 },
+        { dept: 'HR', rate: 1.2 },
+        { dept: 'Finance', rate: 2.5 }
+      ],
+      leaveByType: [
+        { name: 'Annual', count: 12 },
+        { name: 'Sick', count: 6 },
+        { name: 'Casual', count: 5 },
+        { name: 'Unpaid', count: 1 }
+      ],
+      topLateComers: [
+        { id: 'EMP-005', name: 'Zainab Ahmed', dept: 'Engineering', count: 4 },
+        { id: 'EMP-003', name: 'Bilal Tariq', dept: 'Finance', count: 3 },
+        { id: 'EMP-008', name: 'Usman Farooq', dept: 'Engineering', count: 2 },
+        { id: 'EMP-002', name: 'Ali Khan', dept: 'Engineering', count: 1 },
+        { id: 'EMP-006', name: 'Hina Malik', dept: 'HR', count: 1 }
+      ],
+      departments
+    });
+  }
+
+  if (pathname === '/dashboard/admin') {
+    const from = params.get('from') || '';
+    const to = params.get('to') || '';
+    const deptId = params.get('departmentId') || '';
+
+    const count = employees.length || 24;
+    const totalPayroll = 3840000;
+    const avgSalary = Math.round(totalPayroll / count);
+
+    return respond({
+      headcount: count,
+      attritionYtd: '4.2%',
+      payrollCost: totalPayroll,
+      avgSalary: avgSalary,
+      headcountByDept: [
+        { dept: 'Engineering', count: 13 },
+        { dept: 'Finance', count: 6 },
+        { dept: 'HR', count: 5 }
+      ],
+      payrollByDept: [
+        { dept: 'Engineering', cost: 2150000 },
+        { dept: 'Finance', cost: 960000 },
+        { dept: 'HR', cost: 730000 }
+      ],
+      recentAudits: auditLogs.slice(0, 5),
+      departments
     });
   }
 
   if (pathname === '/dashboard/me') {
+    const empId = currentUser?.employeeId || 'EMP-002';
+    const todayRecord = attendance.find((a) => a.employeeId === empId && a.date === todayStr) || null;
     return respond({
-      employeeId: currentUser?.employeeId || 'EMP-002',
-      name: currentUser?.name || 'Employee',
-      leavesRemaining: 28,
-      attendanceRate: '95%',
-      lastCheckIn: '09:05:00'
+      employeeId: empId,
+      name: currentUser?.name || 'Ali Khan',
+      todayAttendance: todayRecord,
+      hoursThisWeek: 34.5,
+      targetHours: 40,
+      lateCountMonth: 1,
+      leaveBalance: { annual: 11, sick: 8, casual: 9, unpaid: 0 },
+      lastPayslip: { month: '2026-09', net: 231000 },
+      announcements: announcements.slice(0, 3)
     });
   }
 
@@ -819,13 +904,25 @@ export default async function mockAdapter(config) {
 
   // 9. AI Assistant
   if (pathname === '/ai/chat' && method === 'POST') {
-    const q = body.message?.toLowerCase() || '';
+    const q = (body.message || '').toLowerCase();
     let reply = `Based on company policy and your role (${currentUser?.role || 'user'}), standard working hours are 09:00 with a 15-minute grace period. Your remaining leave quota is healthy.`;
-    if (q.includes('leave') || q.includes('vacation')) {
+
+    if (q.includes('colleague') || q.includes("ali's salary") || (currentUser?.role === 'employee' && (q.includes('salary of') || q.includes('someone else') || q.includes('other employee')))) {
+      reply = 'Access Denied: Data scope restriction enforced. As an employee, you are strictly authorized to view your own salary and payslip records. Accessing colleague compensation data is prohibited by company policy and role permissions.';
+    } else if (q.includes('sick leave') || q.includes('sick leaves')) {
+      reply = 'You currently have 8 sick leaves remaining for the current calendar year. Sick leave is fully paid and does not require advance approval for emergencies under 2 consecutive days.';
+    } else if (q.includes('monday and tuesday') || q.includes('smart leave')) {
+      reply = 'I have identified your request for Monday and Tuesday off (Annual Leave). You can navigate to the Leave tab where the Smart Leave Assistant has parsed your dates, or ask me to draft it for you.';
+    } else if (q.includes('attendance summary') || q.includes('attendance trend')) {
+      reply = 'Weekly attendance compliance is at 94.8% with an average check-in time of 09:08 AM. 1 late arrival recorded today.';
+    } else if (q.includes('late today') || q.includes('who was late')) {
+      reply = 'Today, 1 employee checked in after the 09:15 grace threshold: Ali Khan (checked in at 09:22 AM).';
+    } else if (q.includes('payroll') || q.includes('total monthly payroll')) {
+      reply = 'Total monthly payroll liability for the current cycle is PKR 3,840,000 across 24 active employees with an average salary of PKR 160,000.';
+    } else if (q.includes('leave') || q.includes('vacation')) {
       reply = 'Annual leave quota is 14 days per calendar year. You currently have 11 annual leave days remaining. Weekends and gazetted holidays are excluded from deduction.';
-    } else if (q.includes('payroll') || q.includes('salary') || q.includes('tax')) {
-      reply = 'Gross salary is structured as 1.5x basic salary (Basic: 100%, HRA: 40%, Medical: 10%). Tax withholding follows statutory annual tax slabs calculated across 12 monthly cycles.';
     }
+
     return respond({ reply, label: 'AI-generated' });
   }
 
@@ -841,15 +938,46 @@ export default async function mockAdapter(config) {
   }
 
   if (pathname === '/ai/smart-leave' && method === 'POST') {
-    const text = body.text || '';
-    if (!text.trim()) {
+    const text = (body.text || '').trim();
+    if (!text) {
       return respond({ error: 'No leave prompt provided.' }, 400);
     }
+    const lower = text.toLowerCase();
+    let type = 'Annual';
+    if (lower.includes('sick') || lower.includes('doctor') || lower.includes('fever') || lower.includes('ill') || lower.includes('hospital')) {
+      type = 'Sick';
+    } else if (lower.includes('casual') || lower.includes('urgent') || lower.includes('personal') || lower.includes('family')) {
+      type = 'Casual';
+    } else if (lower.includes('unpaid')) {
+      type = 'Unpaid';
+    }
+
+    let start = '2026-10-26';
+    let end = '2026-10-27';
+
+    if (lower.includes('tomorrow')) {
+      const d = new Date();
+      d.setDate(d.getDate() + 1);
+      start = d.toISOString().slice(0, 10);
+      end = start;
+    } else if (lower.includes('monday and tuesday') || lower.includes('mon and tue')) {
+      start = '2026-10-26';
+      end = '2026-10-27';
+    } else if (lower.includes('friday')) {
+      start = '2026-10-30';
+      end = '2026-10-30';
+    } else if (lower.includes('next week')) {
+      start = '2026-10-26';
+      end = '2026-10-30';
+    }
+
+    const reason = text.replace(/^(i need|please grant me|apply for|take)\s+/i, '');
+
     return respond({
-      type: 'Annual',
-      start: '2026-11-10',
-      end: '2026-11-12',
-      reason: text,
+      type,
+      start,
+      end,
+      reason: reason.charAt(0).toUpperCase() + reason.slice(1),
       label: 'AI-generated'
     });
   }

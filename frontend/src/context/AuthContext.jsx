@@ -55,6 +55,29 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     const res = await api.post('/auth/login', { email, password });
+    if (res.data?.requirePin) {
+      return res.data;
+    }
+    const { token: receivedToken, user: receivedUser } = res.data;
+    setToken(receivedToken);
+    setUser(receivedUser);
+    localStorage.setItem('hcm_token', receivedToken);
+    localStorage.setItem('hcm_user', JSON.stringify(receivedUser));
+    return receivedUser;
+  };
+
+  const verifyPin = async (email, pin) => {
+    const res = await api.post('/auth/pin/verify', { email, pin });
+    const { token: receivedToken, user: receivedUser } = res.data;
+    setToken(receivedToken);
+    setUser(receivedUser);
+    localStorage.setItem('hcm_token', receivedToken);
+    localStorage.setItem('hcm_user', JSON.stringify(receivedUser));
+    return receivedUser;
+  };
+
+  const setupPin = async (email, pin) => {
+    const res = await api.post('/auth/pin/setup', { email, pin });
     const { token: receivedToken, user: receivedUser } = res.data;
     setToken(receivedToken);
     setUser(receivedUser);
@@ -94,6 +117,8 @@ export const AuthProvider = ({ children }) => {
         loading,
         needsSetup,
         login,
+        verifyPin,
+        setupPin,
         logout,
         changePassword,
         completeSetup,
