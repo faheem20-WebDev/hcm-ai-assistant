@@ -1,50 +1,47 @@
-# FRONTEND HANDOFF LOG
+# FRONTEND HANDOFF & DESIGN SYSTEM STATUS
 
-## Status Overview
+## Executive Summary
+Audited on: 2026-10-25 (Saylani Hackathon HCM Lite)
+Scope: Visual redesign ONLY. Logic, state, API endpoints, mockApi, permissions, and routes remain unchanged.
 
-### DONE
-- **Scaffold, Auth & Routing**: Vite + React 18, React Router v6, Axios interceptors, responsive Layout with mobile drawer navigation, ProtectedRoute with role enforcement (`admin`, `hr`, `employee`).
-- **Setup Page (`/setup`)**: Initial company settings and first Admin registration (`GET /setup/status`, `POST /setup`).
-- **Change Password (`/change-password`)**: Mandatory forced change for first-time login (`mustChangePassword: true`) and self-service password update.
-- **Organization Settings (`/organization`)**: Company office geofence & working hours, Departments, Designations, Leave Types, and Holidays management (Admin write / HR read).
-- **HR Users Administration (`/hr-users`)**: HR user creation with auto-generated temporary password copy banner, Admin Deactivate and Reset Password actions (`POST /users/hr`, `PATCH /users/:id/deactivate`, `POST /users/:id/reset-password`).
-- **Audit Logs (`/audit`)**: Immutable administrative audit trail with pagination and expandable event metadata.
-- **Attendance (`/attendance`)**: Employee geolocated check-in/out, monthly attendance history, attendance correction request modal; HR/Admin attendance board and correction approvals queue.
-- **Leaves & Smart Leave (`/leave`)**: Employee leave balances cards, natural language AI Smart Leave parser (`POST /ai/smart-leave`), leave application modal, cancellation; HR/Admin approval queue with decision modal.
-- **Payroll & Payslips (`/payroll`, `/payslips`)**: HR monthly payroll draft calculation, run breakdown, Admin finalization lock; Employee payslip statement history and PDF download.
-- **Announcements (`/announcements`)**: Company-wide announcement bulletin board, HR/Admin announcement composer with priority tagging.
-- **Employee Profile (`/profile`)**: Employee profile overview and self-service contact update (`PATCH /me/profile`).
-- **Dashboards (`/dashboard`)**: Role-scoped dashboards for Admin, HR, and Employee. Recharts visualizations (attendance trends, department headcounts), date/department filtering, and AI Summarize button (`POST /ai/summary`) with visible `AI-generated` badge.
-- **AI Chat Assistant (`/ai`)**: Role-aware conversational interface (`POST /ai/chat`), suggested prompts, employee colleague salary refusal guardrail, and `AI-generated` response badges.
+---
 
-- **Employees Directory (`/frontend/src/pages/Employees.jsx`)**: Full directory table with search, department & status filters, responsive layout, register modal with copyable temp password, edit employee details modal, and admin reset password & reset PIN actions.
-- **PIN Setup & Verification (`/login`)**: Mandatory 5-digit PIN step on login for HR and Employee accounts (`POST /auth/pin/verify`, `POST /auth/pin/setup`). Admin accounts bypass PIN directly.
-- **Forgot Password & Admin Reset Requests Queue (`/login`, `/hr-users`)**: User self-service reset request modal, and Admin review/approval queue in HR Users to approve and generate temporary credentials or reject.
-- **Admin Reset PIN**: Admin action to clear forgotten or locked 5-digit PINs for HR users and Employees (`POST /users/:id/reset-pin`).
-- **Clean Empty In-Memory Mock (`mockApi.js`)**: All user and workforce state initialized 100% empty (zero seed employees or users). Flows cleanly from initial setup -> Admin -> HR -> Employee.
+## Redesign Progress by Category
 
-- **API Endpoints Contract (`/API_ENDPOINTS.md`)**: Full backend API specification document covering setup, authentication, PIN verification, forgot password, employees, attendance geofence, leaves, payroll, announcements, dashboards, and AI endpoints.
+### 1. Design System & Theme Tokens: [DONE]
+- File: `src/styles/theme.css` (imported in `main.jsx`).
+- Indigo-violet primary `#5B5BD6`, teal accent `#14B8A6`, light bg `#F4F5FF`, dark bg `#0F1224`, surface `#1B1F3B`.
+- Complete utility classes: `.card`, `.btn`, `.btn-primary`, `.btn-secondary`, `.btn-danger`, `.btn-ghost`, `.input`, `.select`, `.textarea`, `.badge`, `.badge-*`, `.ai-badge`, `.kpi-card`, `.table-container`, `.table`, `.tabs-nav`, `.tab-btn`, `.skeleton`, `.avatar`, `.modal-backdrop`, `.modal-card`.
 
-- **Responsive Polish (375px)**: Navigation drawer, table horizontal scroll wrappers, adaptive headers, and card layouts tested down to 375px mobile viewports.
-- **Interactive Robot Auth UI**: Shared `AuthLayout` split screen with CSS variables theme (deep indigo/teal), animated shifting gradient, floating orbs, and interactive SVG robot (mouse tracking pupils, eye covering on password focus, head shake on error, and 5-digit PIN pop-in boxes).
+### 2. Layout Shell & Auth: [DONE]
+- `AuthLayout.jsx` & `AuthLayout.css`: Compact centered card (max-width 900px, 24px radius, soft shadow), 3D SVG robot with interactive visor and pupil tracking.
+- Auth Pages (`Login.jsx`, `Setup.jsx`, `ChangePassword.jsx`): Converted to compact card format with 5-digit PIN and forgot password flows.
+- `Layout.jsx` & `Layout.css`: Indigo-violet gradient sidebar, inline SVG icons, robot brand wordmark, glowing pill active items, desktop collapse mode, mobile drawer, sticky blur header with breadcrumbs, animated sun/moon dark mode toggle, and notification bell.
 
-- **Compact Auth Card Layout (Item 1)**: Single centered compact card (max-width 900px, 92% width, min-height 520px, 24px radius, soft shadow, soft page background #EEF0FF / #0F1224) with 45% left gradient robot panel and 55% clean form surface, responsive down to 375px.
-- **Advanced 3D-Style Robot (Item 2)**: Rebuilt SVG robot with glass visor, glowing ear pieces, rotating core ring, animated mini equalizer bars, hover jets, ground shadow, speech bubble, red error state, and eye-covering password focus interaction.
+### 3. Shared Components: [TODO - NEXT UP]
+- `src/components/Loading.jsx`: Modern skeleton shimmer cards, table skeletons, and pulse loaders using `.skeleton`.
+- `src/components/Empty.jsx`: Modern inline SVG empty state illustration, theme-aware colors, action buttons.
+- `src/components/ErrorBox.jsx`: Modern alert badge/card with SVG icon, retry action, and theme error tokens.
 
-- **Design System & Theme Tokens (Step 1)**: Unified `src/styles/theme.css` with dark/light mode tokens, Inter typography, layered shadows, custom scrollbar, animations, and reusable classes (`.card`, `.btn`, `.input`, `.badge`, `.table`, `.modal`, `.kpi-card`, `.ai-badge`).
-- **Layout Shell Redesign (Step 2)**: Indigo-violet gradient sidebar with inline SVG icons, robot brand wordmark, glowing pill active items, desktop collapse mode, mobile drawer, sticky blur header with breadcrumbs, animated sun/moon dark mode toggle, and notification pulse.
+### 4. Pages Redesign: [PENDING]
+In order of execution:
+1. `Dashboard.jsx`: KPI count-up cards, Recharts themed containers, AI summary card, attendance & department charts.
+2. `Employees.jsx`: Filter bar, table container, badges, action buttons, modals (register, edit, reset).
+3. `HrUsers.jsx`: HR directory table, add HR modal, password copy alert banner, reset queue.
+4. `Attendance.jsx`: Check-in/out hero card with geofence indicator, calendar/history table, correction modal.
+5. `Leave.jsx`: Balance cards, Smart Leave AI prompt box, application modal, approval queue.
+6. `Payroll.jsx` & `Payslips.jsx`: Payroll run overview, calculation table, finalization lock, employee payslip list.
+7. `Announcements.jsx`: Priority tag cards, composer modal, pinned bulletin styling.
+8. `Audit.jsx`: Filterable log table, expandable JSON metadata drawer/card.
+9. `Organization.jsx`: Tabbed settings (geofence, departments, designations, leaves, holidays).
+10. `Profile.jsx`: Profile card, editable contact form, avatar banner.
+11. `AIAssistant.jsx`: Chat bubbles, suggested prompts chips, streaming indicator, AI badges.
 
-### IN PROGRESS
-- **Shared Components & Feedback States (Step 3)**: Skeleton shimmer loading (no raw text), inline SVG empty illustration, modernized ErrorBox with retry, blur/scale modals, and styled tables.
+### 5. Dark Mode & 375px Responsiveness: [PENDING FINAL PASS]
+- Shell and auth support dark mode. Pages will inherit dark mode once inline styles are replaced with theme classes.
+- Final build verification: `npm run build`.
 
-### PENDING
-- Page restyling across dashboards, employees, attendance, leave, payroll, profile, announcements, audit, and AI assistant.
-- Dark mode audit & 375px mobile responsiveness verification.
+---
 
-## Known Issues
-- None. Layout shell compiles cleanly and supports dark mode switching.
-
-## Ready-to-Paste Next Prompt
-```text
-Step 2 (Layout Shell) is complete. Proceed with Step 3: Redesign shared components in frontend/src/components (Loading.jsx with skeleton shimmer cards/tables, Empty.jsx with inline SVG illustration, ErrorBox.jsx with icon and retry styling).
-```
+## Current Step
+Proceeding to Step 1.3: Redesign shared components (`Loading.jsx`, `Empty.jsx`, `ErrorBox.jsx`).
