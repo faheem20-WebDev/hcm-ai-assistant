@@ -170,48 +170,54 @@ const Organization = () => {
   };
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-        <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#0f172a', margin: '0 0 0.25rem 0' }}>
-            Organization Configuration
-          </h1>
-          <p style={{ margin: 0, color: '#64748b', fontSize: '0.875rem' }}>
-            {isAdmin ? 'Manage corporate settings, departments, designations, and leave policies.' : 'View organization setup and company rules (Read-only).'}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'fadeIn 0.25s ease' }}>
+      <div className="page-header" style={{ marginBottom: 0 }}>
+        <div className="page-header-info">
+          <h1>Organization Configuration</h1>
+          <p>
+            {isAdmin
+              ? 'Manage corporate settings, departments, designations, and leave policies.'
+              : 'View organization setup and company rules (Read-only).'}
           </p>
         </div>
 
         {isAdmin && activeTab !== 'settings' && (
           <button
+            type="button"
             onClick={() => openModal()}
-            style={{
-              backgroundColor: '#2563eb',
-              color: '#ffffff',
-              border: 'none',
-              borderRadius: '6px',
-              padding: '0.55rem 1rem',
-              fontSize: '0.875rem',
-              fontWeight: '600',
-              cursor: 'pointer'
-            }}
+            className="btn btn-primary"
           >
-            + Add New
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Add New
           </button>
         )}
       </div>
 
       {success && (
-        <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', color: '#15803d', padding: '0.75rem', borderRadius: '6px', fontSize: '0.85rem', marginBottom: '1rem' }}>
-          {success}
+        <div
+          style={{
+            backgroundColor: 'var(--success-bg)',
+            border: '1px solid var(--success-border)',
+            color: 'var(--success)',
+            padding: '0.85rem 1.25rem',
+            borderRadius: 'var(--radius-md)',
+            fontSize: '0.875rem',
+            fontWeight: 500
+          }}
+        >
+          ✓ {success}
         </div>
       )}
 
       <ErrorBox error={error} />
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: '0.5rem', borderBottom: '1px solid #cbd5e1', marginBottom: '1.5rem', overflowX: 'auto' }}>
+      <div className="tabs-nav" style={{ marginBottom: 0 }}>
         {[
-          { id: 'settings', label: 'Settings' },
+          { id: 'settings', label: 'Company Settings' },
           { id: 'departments', label: 'Departments' },
           { id: 'designations', label: 'Designations' },
           { id: 'leave-types', label: 'Leave Types' },
@@ -219,17 +225,9 @@ const Organization = () => {
         ].map((tab) => (
           <button
             key={tab.id}
+            type="button"
             onClick={() => setActiveTab(tab.id)}
-            style={{
-              padding: '0.65rem 1.1rem',
-              border: 'none',
-              background: 'none',
-              borderBottom: activeTab === tab.id ? '2px solid #2563eb' : '2px solid transparent',
-              color: activeTab === tab.id ? '#2563eb' : '#64748b',
-              fontWeight: activeTab === tab.id ? '600' : '500',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap'
-            }}
+            className={`tab-btn ${activeTab === tab.id ? 'active' : ''}`}
           >
             {tab.label}
           </button>
@@ -242,10 +240,10 @@ const Organization = () => {
         <>
           {/* 1. SETTINGS TAB */}
           {activeTab === 'settings' && (
-            <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '1.5rem', maxWidth: '720px' }}>
+            <div className="card" style={{ maxWidth: '780px' }}>
               <form onSubmit={handleSettingsSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#334155', marginBottom: '0.35rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.35rem' }}>
                     Company Name
                   </label>
                   <input
@@ -253,13 +251,13 @@ const Organization = () => {
                     disabled={!isAdmin}
                     value={settings.companyName || ''}
                     onChange={(e) => setSettings({ ...settings, companyName: e.target.value })}
-                    style={{ width: '100%', padding: '0.65rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.875rem' }}
+                    className="input"
                   />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#334155', marginBottom: '0.35rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.35rem' }}>
                       Office Start Time
                     </label>
                     <input
@@ -267,11 +265,11 @@ const Organization = () => {
                       disabled={!isAdmin}
                       value={settings.workStartTime || '09:00'}
                       onChange={(e) => setSettings({ ...settings, workStartTime: e.target.value })}
-                      style={{ width: '100%', padding: '0.65rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.875rem' }}
+                      className="input"
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#334155', marginBottom: '0.35rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.35rem' }}>
                       Grace Minutes
                     </label>
                     <input
@@ -279,11 +277,11 @@ const Organization = () => {
                       disabled={!isAdmin}
                       value={settings.graceMinutes || 15}
                       onChange={(e) => setSettings({ ...settings, graceMinutes: Number(e.target.value) })}
-                      style={{ width: '100%', padding: '0.65rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.875rem' }}
+                      className="input"
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#334155', marginBottom: '0.35rem' }}>
+                    <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.35rem' }}>
                       Half-Day Min Work Hours
                     </label>
                     <input
@@ -292,20 +290,20 @@ const Organization = () => {
                       disabled={!isAdmin}
                       value={settings.minWorkHoursHalfDay || 5}
                       onChange={(e) => setSettings({ ...settings, minWorkHoursHalfDay: Number(e.target.value) })}
-                      style={{ width: '100%', padding: '0.65rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.875rem' }}
+                      className="input"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#334155', marginBottom: '0.35rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.35rem' }}>
                     Weekend Days
                   </label>
-                  <div style={{ display: 'flex', gap: '1rem', fontSize: '0.875rem', color: '#334155' }}>
+                  <div style={{ display: 'flex', gap: '1.25rem', fontSize: '0.875rem', color: 'var(--text)', marginTop: '0.25rem' }}>
                     {['Friday', 'Saturday', 'Sunday'].map((day) => {
                       const isChecked = (settings.weekendDays || []).includes(day);
                       return (
-                        <label key={day} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <label key={day} style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', cursor: isAdmin ? 'pointer' : 'default' }}>
                           <input
                             type="checkbox"
                             disabled={!isAdmin}
@@ -325,22 +323,17 @@ const Organization = () => {
                   </div>
                 </div>
 
-                <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '1.25rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                    <span style={{ fontSize: '0.9rem', fontWeight: '600', color: '#0f172a' }}>Office Geofence</span>
+                <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+                    <span style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text)' }}>
+                      Office Geofence & Check-In Radius
+                    </span>
                     {isAdmin && (
                       <button
                         type="button"
                         onClick={handleUseMyLocation}
-                        style={{
-                          backgroundColor: '#f1f5f9',
-                          border: '1px solid #cbd5e1',
-                          borderRadius: '4px',
-                          padding: '0.35rem 0.75rem',
-                          fontSize: '0.8rem',
-                          fontWeight: '500',
-                          cursor: 'pointer'
-                        }}
+                        className="btn btn-secondary btn-sm"
+                        style={{ gap: '0.35rem' }}
                       >
                         📍 Use my location
                       </button>
@@ -349,7 +342,7 @@ const Organization = () => {
 
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.8rem', color: '#64748b', marginBottom: '0.25rem' }}>
+                      <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
                         Latitude
                       </label>
                       <input
@@ -358,11 +351,11 @@ const Organization = () => {
                         disabled={!isAdmin}
                         value={settings.officeLat || 0}
                         onChange={(e) => setSettings({ ...settings, officeLat: parseFloat(e.target.value) })}
-                        style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
+                        className="input"
                       />
                     </div>
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.8rem', color: '#64748b', marginBottom: '0.25rem' }}>
+                      <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
                         Longitude
                       </label>
                       <input
@@ -371,11 +364,11 @@ const Organization = () => {
                         disabled={!isAdmin}
                         value={settings.officeLng || 0}
                         onChange={(e) => setSettings({ ...settings, officeLng: parseFloat(e.target.value) })}
-                        style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
+                        className="input"
                       />
                     </div>
                     <div>
-                      <label style={{ display: 'block', fontSize: '0.8rem', color: '#64748b', marginBottom: '0.25rem' }}>
+                      <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
                         Radius (meters)
                       </label>
                       <input
@@ -383,7 +376,7 @@ const Organization = () => {
                         disabled={!isAdmin}
                         value={settings.officeRadiusMeters || 150}
                         onChange={(e) => setSettings({ ...settings, officeRadiusMeters: parseInt(e.target.value) || 150 })}
-                        style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '0.85rem' }}
+                        className="input"
                       />
                     </div>
                   </div>
@@ -393,18 +386,8 @@ const Organization = () => {
                   <button
                     type="submit"
                     disabled={actionLoading}
-                    style={{
-                      alignSelf: 'flex-start',
-                      backgroundColor: '#2563eb',
-                      color: '#ffffff',
-                      border: 'none',
-                      borderRadius: '6px',
-                      padding: '0.65rem 1.25rem',
-                      fontSize: '0.875rem',
-                      fontWeight: '600',
-                      cursor: actionLoading ? 'not-allowed' : 'pointer',
-                      marginTop: '0.5rem'
-                    }}
+                    className="btn btn-primary"
+                    style={{ alignSelf: 'flex-start', marginTop: '0.5rem' }}
                   >
                     {actionLoading ? 'Saving...' : 'Save Settings'}
                   </button>
@@ -419,37 +402,52 @@ const Organization = () => {
               <Empty
                 title="No departments found"
                 description="Create organization departments such as Engineering, HR, or Finance."
-                action={isAdmin && <button onClick={() => openModal()} style={{ padding: '0.5rem 1rem', background: '#2563eb', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Add Department</button>}
+                action={
+                  isAdmin && (
+                    <button
+                      type="button"
+                      onClick={() => openModal()}
+                      className="btn btn-primary"
+                      style={{ marginTop: '0.5rem' }}
+                    >
+                      + Add Department
+                    </button>
+                  )
+                }
               />
             ) : (
-              <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
-                  <thead style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+              <div className="table-container">
+                <table className="table">
+                  <thead>
                     <tr>
-                      <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Department Name</th>
-                      <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Code</th>
-                      {isAdmin && <th style={{ padding: '0.85rem 1rem', textAlign: 'right', color: '#475569', fontWeight: '600' }}>Actions</th>}
+                      <th>Department Name</th>
+                      <th>Code</th>
+                      {isAdmin && <th style={{ textAlign: 'right' }}>Actions</th>}
                     </tr>
                   </thead>
                   <tbody>
                     {departments.map((dept) => (
-                      <tr key={dept.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '0.85rem 1rem', fontWeight: '500' }}>{dept.name}</td>
-                        <td style={{ padding: '0.85rem 1rem', color: '#64748b' }}>{dept.code || '-'}</td>
+                      <tr key={dept.id}>
+                        <td style={{ fontWeight: 600, color: 'var(--text)' }}>{dept.name}</td>
+                        <td style={{ color: 'var(--text-muted)' }}>{dept.code || '-'}</td>
                         {isAdmin && (
-                          <td style={{ padding: '0.85rem 1rem', textAlign: 'right' }}>
-                            <button
-                              onClick={() => openModal(dept)}
-                              style={{ marginRight: '0.5rem', background: 'none', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem' }}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDelete(dept.id)}
-                              style={{ background: 'none', border: '1px solid #fecaca', color: '#dc2626', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem' }}
-                            >
-                              Delete
-                            </button>
+                          <td style={{ textAlign: 'right' }}>
+                            <div style={{ display: 'inline-flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
+                              <button
+                                type="button"
+                                onClick={() => openModal(dept)}
+                                className="btn btn-secondary btn-sm"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDelete(dept.id)}
+                                className="btn btn-danger btn-sm"
+                              >
+                                Delete
+                              </button>
+                            </div>
                           </td>
                         )}
                       </tr>
@@ -466,39 +464,54 @@ const Organization = () => {
               <Empty
                 title="No designations found"
                 description="Add designations like Senior Engineer or HR Manager."
-                action={isAdmin && <button onClick={() => openModal()} style={{ padding: '0.5rem 1rem', background: '#2563eb', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Add Designation</button>}
+                action={
+                  isAdmin && (
+                    <button
+                      type="button"
+                      onClick={() => openModal()}
+                      className="btn btn-primary"
+                      style={{ marginTop: '0.5rem' }}
+                    >
+                      + Add Designation
+                    </button>
+                  )
+                }
               />
             ) : (
-              <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
-                  <thead style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+              <div className="table-container">
+                <table className="table">
+                  <thead>
                     <tr>
-                      <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Title</th>
-                      <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Department</th>
-                      {isAdmin && <th style={{ padding: '0.85rem 1rem', textAlign: 'right', color: '#475569', fontWeight: '600' }}>Actions</th>}
+                      <th>Title</th>
+                      <th>Department</th>
+                      {isAdmin && <th style={{ textAlign: 'right' }}>Actions</th>}
                     </tr>
                   </thead>
                   <tbody>
                     {designations.map((des) => {
                       const dept = departments.find((d) => d.id === des.departmentId);
                       return (
-                        <tr key={des.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                          <td style={{ padding: '0.85rem 1rem', fontWeight: '500' }}>{des.title}</td>
-                          <td style={{ padding: '0.85rem 1rem', color: '#64748b' }}>{dept?.name || '-'}</td>
+                        <tr key={des.id}>
+                          <td style={{ fontWeight: 600, color: 'var(--text)' }}>{des.title}</td>
+                          <td style={{ color: 'var(--text-muted)' }}>{dept?.name || '-'}</td>
                           {isAdmin && (
-                            <td style={{ padding: '0.85rem 1rem', textAlign: 'right' }}>
-                              <button
-                                onClick={() => openModal(des)}
-                                style={{ marginRight: '0.5rem', background: 'none', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem' }}
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => handleDelete(des.id)}
-                                style={{ background: 'none', border: '1px solid #fecaca', color: '#dc2626', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem' }}
-                              >
-                                Delete
-                              </button>
+                            <td style={{ textAlign: 'right' }}>
+                              <div style={{ display: 'inline-flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => openModal(des)}
+                                  className="btn btn-secondary btn-sm"
+                                >
+                                  Edit
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDelete(des.id)}
+                                  className="btn btn-danger btn-sm"
+                                >
+                                  Delete
+                                </button>
+                              </div>
                             </td>
                           )}
                         </tr>
@@ -516,50 +529,58 @@ const Organization = () => {
               <Empty
                 title="No leave types configured"
                 description="Define leave policies such as Annual, Sick, Casual, or Unpaid."
-                action={isAdmin && <button onClick={() => openModal()} style={{ padding: '0.5rem 1rem', background: '#2563eb', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Add Leave Type</button>}
+                action={
+                  isAdmin && (
+                    <button
+                      type="button"
+                      onClick={() => openModal()}
+                      className="btn btn-primary"
+                      style={{ marginTop: '0.5rem' }}
+                    >
+                      + Add Leave Type
+                    </button>
+                  )
+                }
               />
             ) : (
-              <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
-                  <thead style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+              <div className="table-container">
+                <table className="table">
+                  <thead>
                     <tr>
-                      <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Leave Type</th>
-                      <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Yearly Quota (Days)</th>
-                      <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Type</th>
-                      {isAdmin && <th style={{ padding: '0.85rem 1rem', textAlign: 'right', color: '#475569', fontWeight: '600' }}>Actions</th>}
+                      <th>Leave Type</th>
+                      <th>Yearly Quota (Days)</th>
+                      <th>Type</th>
+                      {isAdmin && <th style={{ textAlign: 'right' }}>Actions</th>}
                     </tr>
                   </thead>
                   <tbody>
                     {leaveTypes.map((lt) => (
-                      <tr key={lt.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '0.85rem 1rem', fontWeight: '500' }}>{lt.name}</td>
-                        <td style={{ padding: '0.85rem 1rem' }}>{lt.quota}</td>
-                        <td style={{ padding: '0.85rem 1rem' }}>
-                          <span style={{
-                            padding: '0.2rem 0.5rem',
-                            borderRadius: '4px',
-                            fontSize: '0.75rem',
-                            fontWeight: '600',
-                            backgroundColor: lt.paid ? '#dcfce7' : '#f1f5f9',
-                            color: lt.paid ? '#15803d' : '#64748b'
-                          }}>
+                      <tr key={lt.id}>
+                        <td style={{ fontWeight: 600, color: 'var(--text)' }}>{lt.name}</td>
+                        <td style={{ color: 'var(--text)' }}>{lt.quota}</td>
+                        <td>
+                          <span className={`badge ${lt.paid ? 'badge-present' : 'badge-inactive'}`}>
                             {lt.paid ? 'Paid' : 'Unpaid'}
                           </span>
                         </td>
                         {isAdmin && (
-                          <td style={{ padding: '0.85rem 1rem', textAlign: 'right' }}>
-                            <button
-                              onClick={() => openModal(lt)}
-                              style={{ marginRight: '0.5rem', background: 'none', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem' }}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDelete(lt.id)}
-                              style={{ background: 'none', border: '1px solid #fecaca', color: '#dc2626', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem' }}
-                            >
-                              Delete
-                            </button>
+                          <td style={{ textAlign: 'right' }}>
+                            <div style={{ display: 'inline-flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
+                              <button
+                                type="button"
+                                onClick={() => openModal(lt)}
+                                className="btn btn-secondary btn-sm"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDelete(lt.id)}
+                                className="btn btn-danger btn-sm"
+                              >
+                                Delete
+                              </button>
+                            </div>
                           </td>
                         )}
                       </tr>
@@ -576,37 +597,52 @@ const Organization = () => {
               <Empty
                 title="No holidays configured"
                 description="Define gazetted company holidays."
-                action={isAdmin && <button onClick={() => openModal()} style={{ padding: '0.5rem 1rem', background: '#2563eb', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Add Holiday</button>}
+                action={
+                  isAdmin && (
+                    <button
+                      type="button"
+                      onClick={() => openModal()}
+                      className="btn btn-primary"
+                      style={{ marginTop: '0.5rem' }}
+                    >
+                      + Add Holiday
+                    </button>
+                  )
+                }
               />
             ) : (
-              <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.875rem' }}>
-                  <thead style={{ backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+              <div className="table-container">
+                <table className="table">
+                  <thead>
                     <tr>
-                      <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Date</th>
-                      <th style={{ padding: '0.85rem 1rem', color: '#475569', fontWeight: '600' }}>Holiday Name</th>
-                      {isAdmin && <th style={{ padding: '0.85rem 1rem', textAlign: 'right', color: '#475569', fontWeight: '600' }}>Actions</th>}
+                      <th>Date</th>
+                      <th>Holiday Name</th>
+                      {isAdmin && <th style={{ textAlign: 'right' }}>Actions</th>}
                     </tr>
                   </thead>
                   <tbody>
                     {holidays.map((hol) => (
-                      <tr key={hol.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '0.85rem 1rem', fontWeight: '500', color: '#1e293b' }}>{hol.date}</td>
-                        <td style={{ padding: '0.85rem 1rem', color: '#64748b' }}>{hol.name}</td>
+                      <tr key={hol.id}>
+                        <td style={{ fontWeight: 600, color: 'var(--text)' }}>{hol.date}</td>
+                        <td style={{ color: 'var(--text-muted)' }}>{hol.name}</td>
                         {isAdmin && (
-                          <td style={{ padding: '0.85rem 1rem', textAlign: 'right' }}>
-                            <button
-                              onClick={() => openModal(hol)}
-                              style={{ marginRight: '0.5rem', background: 'none', border: '1px solid #cbd5e1', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem' }}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDelete(hol.id)}
-                              style={{ background: 'none', border: '1px solid #fecaca', color: '#dc2626', borderRadius: '4px', padding: '0.25rem 0.5rem', cursor: 'pointer', fontSize: '0.75rem' }}
-                            >
-                              Delete
-                            </button>
+                          <td style={{ textAlign: 'right' }}>
+                            <div style={{ display: 'inline-flex', gap: '0.4rem', justifyContent: 'flex-end' }}>
+                              <button
+                                type="button"
+                                onClick={() => openModal(hol)}
+                                className="btn btn-secondary btn-sm"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDelete(hol.id)}
+                                className="btn btn-danger btn-sm"
+                              >
+                                Delete
+                              </button>
+                            </div>
                           </td>
                         )}
                       </tr>
@@ -621,49 +657,47 @@ const Organization = () => {
 
       {/* Reusable Simple Modal */}
       {modalOpen && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 100,
-          padding: '1rem'
-        }}>
-          <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '8px',
-            padding: '1.75rem',
-            width: '100%',
-            maxWidth: '440px',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)'
-          }}>
-            <h3 style={{ margin: '0 0 1.25rem 0', fontSize: '1.15rem', color: '#0f172a' }}>
-              {editingItem ? 'Edit' : 'Add New'} {activeTab.replace('-', ' ')}
-            </h3>
+        <div className="modal-backdrop">
+          <div className="modal-card" style={{ maxWidth: '440px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <h2 style={{ margin: 0 }}>
+                {editingItem ? 'Edit' : 'Add New'} {activeTab.replace('-', ' ')}
+              </h2>
+              <button
+                type="button"
+                onClick={() => setModalOpen(false)}
+                className="btn btn-ghost btn-sm"
+                style={{ padding: '0.2rem 0.5rem' }}
+              >
+                ✕
+              </button>
+            </div>
 
             <form onSubmit={handleModalSave} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {activeTab === 'departments' && (
                 <>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.25rem' }}>Department Name</label>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.35rem' }}>
+                      Department Name
+                    </label>
                     <input
                       type="text"
                       required
                       value={modalForm.name || ''}
                       onChange={(e) => setModalForm({ ...modalForm, name: e.target.value })}
-                      style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px' }}
+                      className="input"
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.25rem' }}>Code</label>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.35rem' }}>
+                      Code
+                    </label>
                     <input
                       type="text"
                       placeholder="e.g. ENG"
                       value={modalForm.code || ''}
                       onChange={(e) => setModalForm({ ...modalForm, code: e.target.value })}
-                      style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px' }}
+                      className="input"
                     />
                   </div>
                 </>
@@ -672,21 +706,25 @@ const Organization = () => {
               {activeTab === 'designations' && (
                 <>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.25rem' }}>Designation Title</label>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.35rem' }}>
+                      Designation Title
+                    </label>
                     <input
                       type="text"
                       required
                       value={modalForm.title || ''}
                       onChange={(e) => setModalForm({ ...modalForm, title: e.target.value })}
-                      style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px' }}
+                      className="input"
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.25rem' }}>Department</label>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.35rem' }}>
+                      Department
+                    </label>
                     <select
                       value={modalForm.departmentId || ''}
                       onChange={(e) => setModalForm({ ...modalForm, departmentId: e.target.value })}
-                      style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px' }}
+                      className="select"
                     >
                       {departments.map((d) => (
                         <option key={d.id} value={d.id}>{d.name}</option>
@@ -699,26 +737,30 @@ const Organization = () => {
               {activeTab === 'leave-types' && (
                 <>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.25rem' }}>Leave Name</label>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.35rem' }}>
+                      Leave Name
+                    </label>
                     <input
                       type="text"
                       required
                       value={modalForm.name || ''}
                       onChange={(e) => setModalForm({ ...modalForm, name: e.target.value })}
-                      style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px' }}
+                      className="input"
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.25rem' }}>Yearly Quota (Days)</label>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.35rem' }}>
+                      Yearly Quota (Days)
+                    </label>
                     <input
                       type="number"
                       required
                       value={modalForm.quota ?? 0}
                       onChange={(e) => setModalForm({ ...modalForm, quota: parseInt(e.target.value) || 0 })}
-                      style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px' }}
+                      className="input"
                     />
                   </div>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--text)' }}>
                     <input
                       type="checkbox"
                       checked={Boolean(modalForm.paid)}
@@ -732,40 +774,44 @@ const Organization = () => {
               {activeTab === 'holidays' && (
                 <>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.25rem' }}>Date (YYYY-MM-DD)</label>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.35rem' }}>
+                      Date (YYYY-MM-DD)
+                    </label>
                     <input
                       type="date"
                       required
                       value={modalForm.date || ''}
                       onChange={(e) => setModalForm({ ...modalForm, date: e.target.value })}
-                      style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px' }}
+                      className="input"
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.25rem' }}>Holiday Name</label>
+                    <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: 'var(--text)', marginBottom: '0.35rem' }}>
+                      Holiday Name
+                    </label>
                     <input
                       type="text"
                       required
                       value={modalForm.name || ''}
                       onChange={(e) => setModalForm({ ...modalForm, name: e.target.value })}
-                      style={{ width: '100%', padding: '0.55rem 0.75rem', border: '1px solid #cbd5e1', borderRadius: '6px' }}
+                      className="input"
                     />
                   </div>
                 </>
               )}
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.75rem' }}>
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  style={{ padding: '0.5rem 1rem', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer' }}
+                  className="btn btn-secondary"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  style={{ padding: '0.5rem 1rem', background: '#2563eb', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+                  className="btn btn-primary"
                 >
                   {actionLoading ? 'Saving...' : 'Save'}
                 </button>

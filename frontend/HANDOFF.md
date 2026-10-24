@@ -33,8 +33,8 @@ In order of execution:
 6. `Payroll.jsx` & `Payslips.jsx`: [DONE] Payroll run overview, calculation table, finalization lock, employee payslip list.
 7. `Announcements.jsx`: [DONE] Priority tag cards, composer modal/card, pinned bulletin styling.
 8. `Audit.jsx`: [DONE] Filterable log table, expandable JSON metadata drawer/card.
-9. `Organization.jsx`: [NEXT UP] Tabbed settings (geofence, departments, designations, leaves, holidays).
-10. `Profile.jsx`: Profile card, editable contact form, avatar banner.
+9. `Organization.jsx`: [DONE] Tabbed settings (geofence, departments, designations, leaves, holidays).
+10. `Profile.jsx`: [NEXT UP] Profile card, editable contact form, avatar banner.
 11. `AIAssistant.jsx`: Chat bubbles, suggested prompts chips, streaming indicator, AI badges.
 
 ### 5. Dark Mode & 375px Responsiveness: [PENDING FINAL PASS]
