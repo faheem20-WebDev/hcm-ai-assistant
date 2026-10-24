@@ -32,8 +32,8 @@ In order of execution:
 5. `Leave.jsx`: [DONE] Balance cards, Smart Leave AI prompt box, application modal, approval queue.
 6. `Payroll.jsx` & `Payslips.jsx`: [DONE] Payroll run overview, calculation table, finalization lock, employee payslip list.
 7. `Announcements.jsx`: [DONE] Priority tag cards, composer modal/card, pinned bulletin styling.
-8. `Audit.jsx`: [NEXT UP] Filterable log table, expandable JSON metadata drawer/card.
-9. `Organization.jsx`: Tabbed settings (geofence, departments, designations, leaves, holidays).
+8. `Audit.jsx`: [DONE] Filterable log table, expandable JSON metadata drawer/card.
+9. `Organization.jsx`: [NEXT UP] Tabbed settings (geofence, departments, designations, leaves, holidays).
 10. `Profile.jsx`: Profile card, editable contact form, avatar banner.
 11. `AIAssistant.jsx`: Chat bubbles, suggested prompts chips, streaming indicator, AI badges.
 
