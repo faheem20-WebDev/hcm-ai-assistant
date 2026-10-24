@@ -45,114 +45,13 @@ let holidays = [
   { id: 'hol-3', name: 'Independence Day', date: '2026-08-14' }
 ];
 
-let employees = [
-  {
-    id: 'EMP-001',
-    name: 'Sarah HR',
-    email: 'hr@company.com',
-    departmentId: 'dept-2',
-    designationId: 'des-2',
-    status: 'active',
-    basicSalary: 120000,
-    grossSalary: 180000,
-    phone: '+92 321 7654321',
-    address: 'Gulshan-e-Iqbal, Karachi',
-    joinedDate: '2025-01-15'
-  },
-  {
-    id: 'EMP-002',
-    name: 'Ali Khan',
-    email: 'emp@company.com',
-    departmentId: 'dept-1',
-    designationId: 'des-1',
-    status: 'active',
-    basicSalary: 160000,
-    grossSalary: 240000,
-    phone: '+92 300 1234567',
-    address: 'Clifton, Karachi',
-    joinedDate: '2025-02-01'
-  }
-];
-
-let attendance = [
-  {
-    id: 'att-1',
-    employeeId: 'EMP-002',
-    date: '2026-10-23',
-    checkIn: '09:05:00',
-    checkOut: '17:35:00',
-    status: 'present',
-    workHours: 8.5
-  }
-];
-
+let employees = [];
+let attendance = [];
 let corrections = [];
-
-let leaves = [
-  {
-    id: 'lev-1',
-    employeeId: 'EMP-002',
-    type: 'Annual',
-    startDate: '2026-11-02',
-    endDate: '2026-11-04',
-    days: 3,
-    reason: 'Family event',
-    status: 'approved',
-    comment: 'Approved by HR'
-  }
-];
-
-let notifications = [
-  {
-    id: 'notif-1',
-    title: 'Payroll Draft Generated',
-    message: 'October 2026 payroll draft is ready for review.',
-    isRead: false,
-    createdAt: new Date().toISOString()
-  }
-];
-
-let announcements = [
-  {
-    id: 'ann-1',
-    title: 'Welcome to HCM Lite',
-    content: 'Welcome to the newly deployed Human Capital Management portal.',
-    priority: 'high',
-    createdAt: new Date().toISOString()
-  }
-];
-
-let payrollRuns = [
-  {
-    id: 'pr-2026-09',
-    month: '2026-09',
-    totalGross: 420000,
-    totalDeductions: 15000,
-    totalNet: 405000,
-    isFinalized: true,
-    finalizedAt: '2026-09-30T18:00:00Z',
-    items: [
-      {
-        employeeId: 'EMP-001',
-        name: 'Sarah HR',
-        basic: 120000,
-        gross: 180000,
-        tax: 6000,
-        deductions: 0,
-        net: 174000
-      },
-      {
-        employeeId: 'EMP-002',
-        name: 'Ali Khan',
-        basic: 160000,
-        gross: 240000,
-        tax: 9000,
-        deductions: 0,
-        net: 231000
-      }
-    ]
-  }
-];
+let leaves = [];
+let notifications = [];
+let announcements = [];
+let payrollRuns = [];
 
 let auditLogs = [
   {
@@ -274,6 +173,16 @@ export default async function mockAdapter(config) {
     if (!found) {
       return respond({ error: 'Invalid email or password.' }, 401);
     }
+    // HR and Employee require 5-digit PIN step on every login (Admin has none)
+    if (found.role === 'hr' || found.role === 'employee') {
+      return respond({
+        requirePin: true,
+        hasPin: Boolean(found.pin),
+        email: found.email,
+        role: found.role,
+        name: found.name
+      });
+    }
     const token = `mock-token-${found.id}`;
     return respond({
       token,
@@ -286,6 +195,89 @@ export default async function mockAdapter(config) {
         mustChangePassword: found.mustChangePassword
       }
     });
+  }
+
+  if (pathname === '/auth/pin/verify' && method === 'POST') {
+    const { email, pin } = body;
+    const found = users.find((u) => u.email === email && u.isActive);
+    if (!found) return respond({ error: 'User not found.' }, 404);
+    if (!found.pin || found.pin !== String(pin).trim()) {
+      return respond({ error: 'Invalid 5-digit PIN.' }, 400);
+    }
+    const token = `mock-token-${found.id}`;
+    return respond({
+      token,
+      user: {
+        id: found.id,
+        name: found.name,
+        email: found.email,
+        role: found.role,
+        employeeId: found.employeeId,
+        mustChangePassword: found.mustChangePassword
+      }
+    });
+  }
+
+  if (pathname === '/auth/pin/setup' && method === 'POST') {
+    const { email, pin } = body;
+    const found = users.find((u) => u.email === email && u.isActive);
+    if (!found) return respond({ error: 'User not found.' }, 404);
+    const cleanPin = String(pin || '').trim();
+    if (!/^\d{5}$/.test(cleanPin)) {
+      return respond({ error: 'PIN must be exactly 5 numeric digits.' }, 400);
+    }
+    found.pin = cleanPin;
+    const token = `mock-token-${found.id}`;
+    return respond({
+      token,
+      user: {
+        id: found.id,
+        name: found.name,
+        email: found.email,
+        role: found.role,
+        employeeId: found.employeeId,
+        mustChangePassword: found.mustChangePassword
+      }
+    });
+  }
+
+  if (pathname === '/auth/forgot-password' && method === 'POST') {
+    const { email, reason } = body;
+    const reqItem = {
+      id: `req-${Date.now()}`,
+      email,
+      reason: reason || 'Password reset requested by user',
+      status: 'pending',
+      createdAt: new Date().toISOString()
+    };
+    resetRequests.unshift(reqItem);
+    return respond({ message: 'Password reset request submitted successfully.' }, 201);
+  }
+
+  if (pathname === '/auth/reset-requests' && method === 'GET') {
+    return respond({ items: resetRequests, total: resetRequests.length });
+  }
+
+  if (pathname.startsWith('/auth/reset-requests/') && pathname.endsWith('/approve') && method === 'POST') {
+    const id = pathname.split('/')[3];
+    const reqItem = resetRequests.find((r) => r.id === id);
+    if (!reqItem) return respond({ error: 'Request not found' }, 404);
+    reqItem.status = 'approved';
+    const tempPassword = `Reset${Math.floor(100000 + Math.random() * 900000)}!`;
+    const u = users.find((x) => x.email === reqItem.email);
+    if (u) {
+      u.password = tempPassword;
+      u.mustChangePassword = true;
+    }
+    return respond({ message: 'Request approved.', tempPassword, email: reqItem.email });
+  }
+
+  if (pathname.startsWith('/auth/reset-requests/') && pathname.endsWith('/reject') && method === 'POST') {
+    const id = pathname.split('/')[3];
+    const reqItem = resetRequests.find((r) => r.id === id);
+    if (!reqItem) return respond({ error: 'Request not found' }, 404);
+    reqItem.status = 'rejected';
+    return respond({ message: 'Request rejected.' });
   }
 
   if (pathname === '/auth/change-password' && method === 'POST') {

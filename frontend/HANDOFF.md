@@ -18,15 +18,16 @@
 - **AI Chat Assistant (`/ai`)**: Role-aware conversational interface (`POST /ai/chat`), suggested prompts, employee colleague salary refusal guardrail, and `AI-generated` response badges.
 
 - **Employees Directory (`/frontend/src/pages/Employees.jsx`)**: Full directory table with search, department & status filters, responsive layout, register modal with copyable temp password, edit employee details modal, and admin reset password & reset PIN actions.
+- **PIN Setup & Verification (`/login`)**: Mandatory 5-digit PIN step on login for HR and Employee accounts (`POST /auth/pin/verify`, `POST /auth/pin/setup`). Admin accounts bypass PIN directly.
+- **Forgot Password & Admin Reset Requests Queue (`/login`, `/hr-users`)**: User self-service reset request modal, and Admin review/approval queue in HR Users to approve and generate temporary credentials or reject.
+- **Admin Reset PIN**: Admin action to clear forgotten or locked 5-digit PINs for HR users and Employees (`POST /users/:id/reset-pin`).
+- **Clean Empty In-Memory Mock (`mockApi.js`)**: All user and workforce state initialized 100% empty (zero seed employees or users). Flows cleanly from initial setup -> Admin -> HR -> Employee.
 
 ### IN PROGRESS
-- **Login PIN Step & Forgot Password (`/frontend/src/pages/Login.jsx`)**: Adding mandatory 5-digit PIN step for HR and Employee logins (Admin bypasses), and self-service Forgot Password request modal.
+- **API Endpoints Contract (`/API_ENDPOINTS.md`)**: Full backend API specification document for teammates building `/backend`.
 
 ### PENDING
-- **Admin Password Reset Requests Queue & Reset PIN**: Admin interface in HR Users / Management to view and approve password reset requests and reset user PINs (`POST /users/:id/reset-pin`).
-- **Clean In-Memory Mock (`mockApi.js`)**: Initialize state completely empty (no pre-seeded employees or users) so system flows from initial setup -> Admin -> HR -> Employee.
-- **API Endpoints Contract (`/API_ENDPOINTS.md`)**: Full backend API specification document for teammates building `/backend`.
-- **Responsive Polish (375px)**: Final audit across all pages and tables for mobile viewports.
+- **Responsive Polish (375px)**: Final verification across all mobile viewports.
 
 ## Known Issues
 - `Employees.jsx` was left as an empty placeholder file (27 lines).
