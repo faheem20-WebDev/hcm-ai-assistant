@@ -3,42 +3,9 @@
 
 const delay = (ms = 300) => new Promise((resolve) => setTimeout(resolve, ms));
 
-let needsSetup = false;
+let needsSetup = true;
 
-let users = [
-  {
-    id: 'usr-admin-1',
-    name: 'Admin User',
-    email: 'admin@company.com',
-    password: 'password123',
-    role: 'admin',
-    employeeId: null,
-    mustChangePassword: false,
-    isActive: true
-  },
-  {
-    id: 'usr-hr-1',
-    name: 'Sarah HR',
-    email: 'hr@company.com',
-    password: 'password123',
-    role: 'hr',
-    employeeId: 'EMP-001',
-    mustChangePassword: false,
-    isActive: true
-  },
-  {
-    id: 'usr-emp-1',
-    name: 'Ali Khan',
-    email: 'emp@company.com',
-    password: 'password123',
-    role: 'employee',
-    employeeId: 'EMP-002',
-    mustChangePassword: false,
-    isActive: true,
-    phone: '+92 300 1234567',
-    address: 'Clifton, Karachi'
-  }
-];
+let users = [];
 
 let settings = {
   companyName: 'Acme HCM Tech',
@@ -234,7 +201,7 @@ const getAuthUser = (headers = {}) => {
   const auth = headers.Authorization || headers.authorization || '';
   if (!auth.startsWith('Bearer ')) return null;
   const token = auth.replace('Bearer ', '');
-  return users.find((u) => u.id === token || `mock-token-${u.id}` === token) || users[0];
+  return users.find((u) => u.id === token || `mock-token-${u.id}` === token) || null;
 };
 
 export default async function mockAdapter(config) {

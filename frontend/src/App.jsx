@@ -1,8 +1,9 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
+import Loading from './components/Loading';
 
 import Setup from './pages/Setup';
 import Login from './pages/Login';
@@ -21,34 +22,33 @@ import Audit from './pages/Audit';
 import AIAssistant from './pages/AIAssistant';
 
 const PublicRoute = ({ children }) => {
-  const { user, token, needsSetup } = useAuth();
-  if (needsSetup) {
-    return <Navigate to="/setup" replace />;
-  }
+  const { user, token } = useAuth();
   if (token && user) {
     return <Navigate to="/dashboard" replace />;
   }
   return children;
 };
 
-const SetupRoute = ({ children }) => {
-  const { needsSetup, loading } = useAuth();
-  if (!loading && !needsSetup) {
+function AppRoutes() {
+  const { loading, needsSetup } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return <Loading fullScreen message="Checking system setup..." />;
+  }
+
+  if (needsSetup && location.pathname !== '/setup') {
+    return <Navigate to="/setup" replace />;
+  }
+
+  if (!needsSetup && location.pathname === '/setup') {
     return <Navigate to="/login" replace />;
   }
-  return children;
-};
-
-function AppRoutes() {
   return (
     <Routes>
       <Route
         path="/setup"
-        element={
-          <SetupRoute>
-            <Setup />
-          </SetupRoute>
-        }
+        element={<Setup />}
       />
       <Route
         path="/login"

@@ -19,9 +19,18 @@ export const AuthProvider = ({ children }) => {
   const checkSetupStatus = async () => {
     try {
       const res = await api.get('/setup/status');
-      setNeedsSetup(Boolean(res.data?.needsSetup));
+      const isNeeded = Boolean(res.data?.needsSetup);
+      setNeedsSetup(isNeeded);
+      if (isNeeded) {
+        localStorage.removeItem('hcm_token');
+        localStorage.removeItem('hcm_user');
+        setToken(null);
+        setUser(null);
+      }
+      return isNeeded;
     } catch {
       setNeedsSetup(false);
+      return false;
     }
   };
 
