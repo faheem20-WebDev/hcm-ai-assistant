@@ -26,6 +26,7 @@
 - **API Endpoints Contract (`/API_ENDPOINTS.md`)**: Full backend API specification document covering setup, authentication, PIN verification, forgot password, employees, attendance geofence, leaves, payroll, announcements, dashboards, and AI endpoints.
 
 - **Responsive Polish (375px)**: Navigation drawer, table horizontal scroll wrappers, adaptive headers, and card layouts tested down to 375px mobile viewports.
+- **Interactive Robot Auth UI**: Shared `AuthLayout` split screen with CSS variables theme (deep indigo/teal), animated shifting gradient, floating orbs, and interactive SVG robot (mouse tracking pupils, eye covering on password focus, head shake on error, and 5-digit PIN pop-in boxes).
 
 ### IN PROGRESS
 - None.
@@ -34,9 +35,9 @@
 - None. All planned modules, flows, and specifications are implemented.
 
 ## Known Issues
-- None. All items from the planned specification and audit are implemented and operational.
+- None. All items from the planned specification and visual redesign are implemented and operational.
 
 ## Ready-to-Paste Next Prompt
 ```text
-All core and extended frontend capabilities (Empty bootstrap setup, Admin/HR/Employee workflows, 5-digit PIN security, password reset requests queue, Employees directory, Recharts dashboards, AI Assistant and /API_ENDPOINTS.md) are complete. Run `npm run build` in /frontend to verify full production build integrity.
+The new interactive auth UI with cute robot animations and CSS variables theme is complete across Setup, Login, PIN screens, and ChangePassword. Run `cmd.exe /c "npm run build"` in /frontend to verify clean production compile.
 ```
