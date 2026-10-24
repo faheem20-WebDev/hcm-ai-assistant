@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api';
+import FloatingRobotAssistant from './FloatingRobotAssistant';
 import './Layout.css';
 
 // Inline Icons for crisp SVG rendering without external libraries
@@ -369,6 +370,9 @@ const Layout = () => {
           </div>
         </main>
       </div>
+
+      {/* Floating Animated Robot Assistant & Popup Chat on Every Screen */}
+      <FloatingRobotAssistant user={user} />
     </div>
   );
 };

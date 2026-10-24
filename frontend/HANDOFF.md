@@ -37,12 +37,13 @@ In order of execution:
 10. `Profile.jsx`: [DONE] Profile card, editable contact form, avatar banner.
 11. `AIAssistant.jsx`: [DONE] Chat bubbles, suggested prompts chips, streaming indicator, AI badges.
 
-### 6. Floating AI Robot Redesign: [IN PROGRESS]
+### 6. Floating AI Robot Redesign: [DONE]
 - Item 1 [DONE]: Removed AI menu item from sidebar and mobile drawer navigation for admin, hr, and employee roles. Old /ai page remains accessible.
-- Item 2 [NEXT UP]: Mount animated compact robot across all logged-in views with responsive clamp() size, idle floating, eye-tracking, and speech bubble.
-- Item 3 [PENDING]: Floating popup chat panel with role suggestion chips, conversation persistence, and dark mode.
+- Item 2 [DONE]: Mounted animated compact robot across all logged-in views with responsive clamp() size, idle floating, eye-tracking, and speech bubble.
+- Item 3 [DONE]: Floating popup chat panel with role suggestion chips, conversation persistence, open full page link, and dark mode support.
+- Verification [DONE]: Production build passes cleanly with zero errors (`npm run build`).
 
 ---
 
-## Current Step
-Proceeding to Step 1.3: Redesign shared components (`Loading.jsx`, `Empty.jsx`, `ErrorBox.jsx`).
+## Status
+All redesign milestones, component updates, and floating AI assistant integrations are 100% complete and production-built.
