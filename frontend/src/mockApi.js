@@ -45,6 +45,7 @@ let settings = {
   workStartTime: '09:00',
   graceMinutes: 15,
   minWorkHoursHalfDay: 5,
+  weekendDays: ['Saturday', 'Sunday'],
   officeLat: 24.8607,
   officeLng: 67.0011,
   officeRadiusMeters: 150
@@ -187,10 +188,33 @@ let payrollRuns = [
 let auditLogs = [
   {
     id: 'aud-1',
-    action: 'SYSTEM_BOOT',
-    actor: 'system',
-    details: 'HCM Lite initialized in Asia/Karachi timezone',
-    timestamp: new Date().toISOString()
+    timestamp: '2026-10-24T18:00:00Z',
+    actor: 'admin@company.com',
+    action: 'UPDATE_SETTINGS',
+    entity: 'OrganizationSettings',
+    details: 'Updated office geofence radius to 150m',
+    before: { officeRadiusMeters: 100, graceMinutes: 10 },
+    after: { officeRadiusMeters: 150, graceMinutes: 15 }
+  },
+  {
+    id: 'aud-2',
+    timestamp: '2026-10-24T17:30:00Z',
+    actor: 'admin@company.com',
+    action: 'CREATE_USER',
+    entity: 'User',
+    details: 'Created HR officer Sarah HR',
+    before: null,
+    after: { email: 'hr@company.com', role: 'hr', isActive: true }
+  },
+  {
+    id: 'aud-3',
+    timestamp: '2026-10-24T16:15:00Z',
+    actor: 'hr@company.com',
+    action: 'APPROVE_LEAVE',
+    entity: 'LeaveRequest',
+    details: 'Approved 3-day annual leave for EMP-002',
+    before: { status: 'pending' },
+    after: { status: 'approved', approvedBy: 'hr@company.com' }
   }
 ];
 
@@ -408,20 +432,26 @@ export default async function mockAdapter(config) {
     }
   }
 
-  if (pathname === '/users/hr' && method === 'POST') {
-    const { name, email, password } = body;
-    const hrUser = {
-      id: `usr-hr-${Date.now()}`,
-      name,
-      email,
-      password: password || 'TempHr123!',
-      role: 'hr',
-      employeeId: null,
-      mustChangePassword: true,
-      isActive: true
-    };
-    users.push(hrUser);
-    return respond(hrUser, 201);
+  if (pathname === '/users/hr') {
+    if (method === 'GET') {
+      const hrList = users.filter((u) => u.role === 'hr');
+      return respond({ items: hrList, total: hrList.length, page: 1, limit: 50 });
+    }
+    if (method === 'POST') {
+      const { name, email, password } = body;
+      const hrUser = {
+        id: `usr-hr-${Date.now()}`,
+        name,
+        email,
+        password: password || 'TempHr123!',
+        role: 'hr',
+        employeeId: null,
+        mustChangePassword: true,
+        isActive: true
+      };
+      users.push(hrUser);
+      return respond(hrUser, 201);
+    }
   }
 
   if (pathname.startsWith('/users/') && pathname.endsWith('/deactivate') && method === 'PATCH') {
