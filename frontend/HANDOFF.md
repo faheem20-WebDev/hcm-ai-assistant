@@ -25,11 +25,13 @@
 
 - **API Endpoints Contract (`/API_ENDPOINTS.md`)**: Full backend API specification document covering setup, authentication, PIN verification, forgot password, employees, attendance geofence, leaves, payroll, announcements, dashboards, and AI endpoints.
 
+- **Responsive Polish (375px)**: Navigation drawer, table horizontal scroll wrappers, adaptive headers, and card layouts tested down to 375px mobile viewports.
+
 ### IN PROGRESS
-- **Responsive Polish (375px)**: Final verification and touch-ups across all views.
+- None.
 
 ### PENDING
-- None. All planned modules and features are implemented.
+- None. All planned modules, flows, and specifications are implemented.
 
 ## Known Issues
 - None. All items from the planned specification and audit are implemented and operational.

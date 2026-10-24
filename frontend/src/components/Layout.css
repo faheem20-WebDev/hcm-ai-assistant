@@ -300,5 +300,29 @@
 
   .hcm-content {
     padding: 1rem;
+    min-width: 0;
   }
 }
+
+@media (max-width: 480px) {
+  .hcm-header {
+    padding: 0 0.75rem;
+  }
+
+  .hcm-header-title {
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 130px;
+  }
+
+  .hcm-content {
+    padding: 0.75rem 0.5rem;
+  }
+
+  .hcm-logout-btn span {
+    display: none;
+  }
+}
+
