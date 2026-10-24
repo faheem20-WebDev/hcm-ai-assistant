@@ -49,9 +49,10 @@ const AuthLayout = ({
   }, [hasError]);
 
   return (
-    <div className="auth-split-wrapper">
-      {/* LEFT: ANIMATED ILLUSTRATION PANEL */}
-      <div className="auth-illustration-panel">
+    <div className="auth-page-container">
+      <div className="auth-compact-card">
+        {/* LEFT: ANIMATED ILLUSTRATION PANEL */}
+        <div className="auth-illustration-panel">
         <div className="auth-orb auth-orb-1" />
         <div className="auth-orb auth-orb-2" />
         <div className="auth-orb auth-orb-3" />
@@ -185,9 +186,9 @@ const AuthLayout = ({
         </div>
       </div>
 
-      {/* RIGHT: AUTH FORM CARD */}
+      {/* RIGHT: AUTH FORM PANEL */}
       <div className="auth-form-panel">
-        <div className="auth-card">
+        <div className="auth-form-content">
           {/* Mobile Small Robot/Logo Header */}
           <div className="auth-mobile-header">
             <div className="auth-brand-logo">✨</div>
@@ -208,7 +209,8 @@ const AuthLayout = ({
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };
 
 export default AuthLayout;

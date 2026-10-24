@@ -28,16 +28,18 @@
 - **Responsive Polish (375px)**: Navigation drawer, table horizontal scroll wrappers, adaptive headers, and card layouts tested down to 375px mobile viewports.
 - **Interactive Robot Auth UI**: Shared `AuthLayout` split screen with CSS variables theme (deep indigo/teal), animated shifting gradient, floating orbs, and interactive SVG robot (mouse tracking pupils, eye covering on password focus, head shake on error, and 5-digit PIN pop-in boxes).
 
+- **Compact Auth Card Layout (Item 1)**: Single centered compact card (max-width 900px, 92% width, min-height 520px, 24px radius, soft shadow, soft page background #EEF0FF / #0F1224) with 45% left gradient robot panel and 55% clean form surface, responsive down to 375px.
+
 ### IN PROGRESS
-- None.
+- **Advanced 3D-Style Robot (Item 2)**: Rebuilding inline SVG robot with glass visor, glowing ear pieces, rotating core ring, animated mini equalizer bars, hover jets, ground shadow, speech bubble, and red error state.
 
 ### PENDING
-- None. All planned modules, flows, and specifications are implemented.
+- Final production build verification.
 
 ## Known Issues
-- None. All items from the planned specification and visual redesign are implemented and operational.
+- None. Compact layout compiles and is fully responsive.
 
 ## Ready-to-Paste Next Prompt
 ```text
-The new interactive auth UI with cute robot animations and CSS variables theme is complete across Setup, Login, PIN screens, and ChangePassword. Run `cmd.exe /c "npm run build"` in /frontend to verify clean production compile.
+Item 1 (Compact Card) is complete. Complete Item 2 (Advanced 3D-style Robot with glass visor, equalizer bars, rotating core, hover jets, and speech bubble) in AuthLayout.jsx and AuthLayout.css, verify with npm run build, update HANDOFF.md, and commit with message "frontend: compact auth card and advanced robot".
 ```
