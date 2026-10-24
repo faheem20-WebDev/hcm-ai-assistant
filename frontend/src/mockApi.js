@@ -789,7 +789,20 @@ export default async function mockAdapter(config) {
   }
 
   if (pathname.startsWith('/payslips/') && pathname.endsWith('/pdf') && method === 'GET') {
-    return respond({ pdfUrl: '#', message: 'PDF generated' });
+    const blob = new Blob(
+      [`%PDF-1.4\n1 0 obj\n<< /Title (Employee Payslip) >>\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF`],
+      { type: 'application/pdf' }
+    );
+    return Promise.resolve({
+      data: blob,
+      status: 200,
+      statusText: 'OK',
+      headers: {
+        'content-type': 'application/pdf',
+        'content-disposition': 'attachment; filename="payslip.pdf"'
+      },
+      config
+    });
   }
 
   // 8. Dashboards & Audit
@@ -804,12 +817,18 @@ export default async function mockAdapter(config) {
   }
 
   if (pathname === '/dashboard/me') {
+    const empId = currentUser?.employeeId || 'EMP-002';
+    const todayRecord = attendance.find((a) => a.employeeId === empId && a.date === todayStr) || null;
     return respond({
-      employeeId: currentUser?.employeeId || 'EMP-002',
-      name: currentUser?.name || 'Employee',
-      leavesRemaining: 28,
-      attendanceRate: '95%',
-      lastCheckIn: '09:05:00'
+      employeeId: empId,
+      name: currentUser?.name || 'Ali Khan',
+      todayAttendance: todayRecord,
+      hoursThisWeek: 34.5,
+      targetHours: 40,
+      lateCountMonth: 1,
+      leaveBalance: { annual: 11, sick: 8, casual: 9, unpaid: 0 },
+      lastPayslip: { month: '2026-09', net: 231000 },
+      announcements: announcements.slice(0, 3)
     });
   }
 
@@ -841,15 +860,46 @@ export default async function mockAdapter(config) {
   }
 
   if (pathname === '/ai/smart-leave' && method === 'POST') {
-    const text = body.text || '';
-    if (!text.trim()) {
+    const text = (body.text || '').trim();
+    if (!text) {
       return respond({ error: 'No leave prompt provided.' }, 400);
     }
+    const lower = text.toLowerCase();
+    let type = 'Annual';
+    if (lower.includes('sick') || lower.includes('doctor') || lower.includes('fever') || lower.includes('ill') || lower.includes('hospital')) {
+      type = 'Sick';
+    } else if (lower.includes('casual') || lower.includes('urgent') || lower.includes('personal') || lower.includes('family')) {
+      type = 'Casual';
+    } else if (lower.includes('unpaid')) {
+      type = 'Unpaid';
+    }
+
+    let start = '2026-10-26';
+    let end = '2026-10-27';
+
+    if (lower.includes('tomorrow')) {
+      const d = new Date();
+      d.setDate(d.getDate() + 1);
+      start = d.toISOString().slice(0, 10);
+      end = start;
+    } else if (lower.includes('monday and tuesday') || lower.includes('mon and tue')) {
+      start = '2026-10-26';
+      end = '2026-10-27';
+    } else if (lower.includes('friday')) {
+      start = '2026-10-30';
+      end = '2026-10-30';
+    } else if (lower.includes('next week')) {
+      start = '2026-10-26';
+      end = '2026-10-30';
+    }
+
+    const reason = text.replace(/^(i need|please grant me|apply for|take)\s+/i, '');
+
     return respond({
-      type: 'Annual',
-      start: '2026-11-10',
-      end: '2026-11-12',
-      reason: text,
+      type,
+      start,
+      end,
+      reason: reason.charAt(0).toUpperCase() + reason.slice(1),
       label: 'AI-generated'
     });
   }

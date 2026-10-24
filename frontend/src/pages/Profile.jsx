@@ -1,15 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api';
 import ErrorBox from '../components/ErrorBox';
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const [phone, setPhone] = useState(user?.phone || '');
   const [address, setAddress] = useState(user?.address || '');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const res = await api.get('/auth/me');
+        if (res.data?.user) {
+          setUser(res.data.user);
+          setPhone(res.data.user.phone || '');
+          setAddress(res.data.user.address || '');
+        }
+      } catch {
+        // Fall back to context
+      }
+    };
+    loadProfile();
+  }, []);
 
   const handleUpdate = async (e) => {
     e.preventDefault();
@@ -20,6 +36,9 @@ const Profile = () => {
     try {
       await api.patch('/me/profile', { phone, address });
       setSuccess(true);
+      if (user) {
+        setUser({ ...user, phone, address });
+      }
     } catch (err) {
       setError(err?.response?.data?.error || 'Failed to update profile.');
     } finally {
