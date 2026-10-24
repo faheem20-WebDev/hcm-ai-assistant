@@ -37,10 +37,10 @@ In order of execution:
 10. `Profile.jsx`: [DONE] Profile card, editable contact form, avatar banner.
 11. `AIAssistant.jsx`: [DONE] Chat bubbles, suggested prompts chips, streaming indicator, AI badges.
 
-### 5. Dark Mode & 375px Responsiveness: [DONE]
-- Shell, Auth, Shared Components, and all 11 application pages now use the theme CSS variables and utility classes.
-- Responsive breakpoints down to 375px supported across all views.
-- Verified build via `npm run build`.
+### 6. Floating AI Robot Redesign: [IN PROGRESS]
+- Item 1 [DONE]: Removed AI menu item from sidebar and mobile drawer navigation for admin, hr, and employee roles. Old /ai page remains accessible.
+- Item 2 [NEXT UP]: Mount animated compact robot across all logged-in views with responsive clamp() size, idle floating, eye-tracking, and speech bubble.
+- Item 3 [PENDING]: Floating popup chat panel with role suggestion chips, conversation persistence, and dark mode.
 
 ---
 

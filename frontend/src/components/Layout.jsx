@@ -157,8 +157,7 @@ const Layout = () => {
       { path: '/leave', label: 'Leave', icon: NavIcons.leave },
       { path: '/payroll', label: 'Payroll', icon: NavIcons.payroll },
       { path: '/announcements', label: 'Announcements', icon: NavIcons.announcements },
-      { path: '/audit', label: 'Audit Trail', icon: NavIcons.audit },
-      { path: '/ai', label: 'AI Assistant', icon: NavIcons.ai }
+      { path: '/audit', label: 'Audit Trail', icon: NavIcons.audit }
     ],
     hr: [
       { path: '/dashboard', label: 'Dashboard', icon: NavIcons.dashboard },
@@ -166,16 +165,14 @@ const Layout = () => {
       { path: '/attendance', label: 'Attendance', icon: NavIcons.attendance },
       { path: '/leave', label: 'Leave', icon: NavIcons.leave },
       { path: '/payroll', label: 'Payroll', icon: NavIcons.payroll },
-      { path: '/announcements', label: 'Announcements', icon: NavIcons.announcements },
-      { path: '/ai', label: 'AI Assistant', icon: NavIcons.ai }
+      { path: '/announcements', label: 'Announcements', icon: NavIcons.announcements }
     ],
     employee: [
       { path: '/dashboard', label: 'Dashboard', icon: NavIcons.dashboard },
       { path: '/attendance', label: 'Attendance', icon: NavIcons.attendance },
       { path: '/leave', label: 'Leave', icon: NavIcons.leave },
       { path: '/payslips', label: 'Payslips', icon: NavIcons.payslips },
-      { path: '/profile', label: 'Profile', icon: NavIcons.profile },
-      { path: '/ai', label: 'AI Assistant', icon: NavIcons.ai }
+      { path: '/profile', label: 'Profile', icon: NavIcons.profile }
     ]
   };
 
