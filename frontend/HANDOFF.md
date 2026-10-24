@@ -32,19 +32,19 @@
 - **Advanced 3D-Style Robot (Item 2)**: Rebuilt SVG robot with glass visor, glowing ear pieces, rotating core ring, animated mini equalizer bars, hover jets, ground shadow, speech bubble, red error state, and eye-covering password focus interaction.
 
 - **Design System & Theme Tokens (Step 1)**: Unified `src/styles/theme.css` with dark/light mode tokens, Inter typography, layered shadows, custom scrollbar, animations, and reusable classes (`.card`, `.btn`, `.input`, `.badge`, `.table`, `.modal`, `.kpi-card`, `.ai-badge`).
+- **Layout Shell Redesign (Step 2)**: Indigo-violet gradient sidebar with inline SVG icons, robot brand wordmark, glowing pill active items, desktop collapse mode, mobile drawer, sticky blur header with breadcrumbs, animated sun/moon dark mode toggle, and notification pulse.
 
 ### IN PROGRESS
-- **Layout Shell Redesign (Step 2)**: Sidebar gradient with SVG robot icon and glowing pills, collapsible desktop drawer, topbar breadcrumb, animated sun/moon dark mode toggle, and notification bell.
+- **Shared Components & Feedback States (Step 3)**: Skeleton shimmer loading (no raw text), inline SVG empty illustration, modernized ErrorBox with retry, blur/scale modals, and styled tables.
 
 ### PENDING
-- Shared components (skeleton shimmer, empty illustration, error retry).
-- Page restyling (dashboards, employees, organization, attendance, leave, payroll, profile, audit, AI).
-- Dark mode toggle persistence & 375px responsive audit.
+- Page restyling across dashboards, employees, attendance, leave, payroll, profile, announcements, audit, and AI assistant.
+- Dark mode audit & 375px mobile responsiveness verification.
 
 ## Known Issues
-- None. Theme system compiles and is active across the app.
+- None. Layout shell compiles cleanly and supports dark mode switching.
 
 ## Ready-to-Paste Next Prompt
 ```text
-Step 1 (Design System theme.css) is complete. Proceed with Step 2: Redesign the Layout shell in frontend/src/components/Layout.jsx and Layout.css (sidebar gradient, robot logo, SVG icons, active glowing pill, collapse button, mobile drawer, topbar with animated dark-mode toggle, breadcrumb and unread notification pulse).
+Step 2 (Layout Shell) is complete. Proceed with Step 3: Redesign shared components in frontend/src/components (Loading.jsx with skeleton shimmer cards/tables, Empty.jsx with inline SVG illustration, ErrorBox.jsx with icon and retry styling).
 ```
