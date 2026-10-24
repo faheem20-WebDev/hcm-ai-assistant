@@ -25,8 +25,8 @@ Scope: Visual redesign ONLY. Logic, state, API endpoints, mockApi, permissions, 
 
 ### 4. Pages Redesign: [IN PROGRESS]
 In order of execution:
-1. `Dashboard.jsx`: KPI count-up cards, Recharts themed containers, AI summary card, attendance & department charts.
-2. `Employees.jsx`: Filter bar, table container, badges, action buttons, modals (register, edit, reset).
+1. `Dashboard.jsx`: [DONE] KPI cards, custom theme tooltips for Recharts, AI summary card, status badges, employee check-in hero.
+2. `Employees.jsx`: [NEXT UP] Filter bar, table container, badges, action buttons, modals (register, edit, reset).
 3. `HrUsers.jsx`: HR directory table, add HR modal, password copy alert banner, reset queue.
 4. `Attendance.jsx`: Check-in/out hero card with geofence indicator, calendar/history table, correction modal.
 5. `Leave.jsx`: Balance cards, Smart Leave AI prompt box, application modal, approval queue.
